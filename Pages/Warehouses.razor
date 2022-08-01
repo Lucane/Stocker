@@ -1,0 +1,95 @@
+﻿@page "/hulgilaod"
+@using Stocker.Data
+@using StockerDB.Data.Stocker
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@*
+    Using OwningComponentBase ensures that the service and related services
+    that share its scope are disposed with the component.
+    Otherwise DbContext in ForecastService will live for the life of the
+    connection, which may be problematic if clients stay
+    connected for a long time.
+    We access WeatherForecastService using @Service
+*@
+@inherits OwningComponentBase<WarehouseConnectionsService>
+<h1>Nimekiri hulgiladude API ühendustest</h1>
+<!-- AuthorizeView allows us to only show sections of the page -->
+<!-- based on the security on the current user -->
+<AuthorizeView>
+    <!-- Show this section if the user is logged in -->
+    <Authorized>
+        @*<h4>Hello, @context.User.Identity?.Name!</h4>*@
+        @if (warehouses == null)
+        {
+            <!-- Show this if the current user has no data... yet... -->
+            <p><em>Laen andmeid...</em></p>
+        }
+        else
+        {
+            <!-- Show the forecasts for the current user -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ladu</th>
+                        <th>URI</th>
+                        <th>Viimati uuendatud</th>
+                        <th align="right">
+                            <button class="button-primary" aria-hidden="true">
+                                <i class="oi oi-plus"></i>
+                            </button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var wh in warehouses)
+                    {
+                        <tr>
+                            <td>@wh.DisplayName</td>
+                            <td>@wh.ConnectionUri</td>
+                            <td>@wh.LastUpdated</td>
+                            <td align="right">
+                                <span>
+                                    <button class="button-primary" aria-hidden="true">
+                                        <i class="oi oi-pencil" />
+                                    </button>
+                                    <button class="button-primary" aria-hidden="true">
+                                        <i class="oi oi-delete"></i>
+                                    </button>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+    <!-- Show this section if the user is not logged in -->
+    <NotAuthorized>
+        <p>Selle lehe nägemiseks pead olema sisse logitud!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code 
+{
+    // AuthenticationState is available as a CascadingParameter
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+    List<WarehouseConnections> warehouses = new List<WarehouseConnections>();
+
+    // no need to limit access to this page as of now
+    //private string UserIdentityName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get the current user
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                //UserIdentityName = user.Identity.Name ?? "";
+                warehouses = await @Service.GetWarehouseConnections();
+            }
+        }
+
+    }
+}
