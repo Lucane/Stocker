@@ -11,7 +11,7 @@
     We access WeatherForecastService using @Service
 *@
 @inherits OwningComponentBase<WarehouseConnectionsService>
-<h1>Nimekiri hulgiladude API ühendustest</h1>
+<h1>Hulgiladude API ühendused</h1>
 <!-- AuthorizeView allows us to only show sections of the page -->
 <!-- based on the security on the current user -->
 <AuthorizeView>
@@ -30,12 +30,39 @@
                 <thead>
                     <tr>
                         <th>Ladu</th>
-                        <th>URI</th>
-                        <th>Viimati uuendatud</th>
-                        <th align="right">
-                            <button class="button-primary" aria-hidden="true">
+                        <th>API URI</th>
+                        <th>Viimati muudetud</th>
+                        <th>
+                            <button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="AddWarehouse">
                                 <i class="oi oi-plus"></i>
                             </button>
+                            @if (ShowPopup)
+                            {
+                                <!-- This is the popup to create or edit a forecast -->
+                                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title">Edit Warehouse</h3>
+                                                <!-- Button to close the popup -->
+                                                <button class="btn btn-close" @onclick="ClosePopup">
+                                                    <span aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                            <!-- Edit form for the current forecast -->
+                                            <div class="modal-body">
+                                                <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouseConnection.DisplayName" />
+                                                <input class="form-control" placeholder="API URI" @bind="objWarehouseConnection.ConnectionUri" />
+                                                <input class="form-control" placeholder="Kasutajanimi" @bind="objWarehouseConnection.LoginName" />
+                                                <input class="form-control" placeholder="Parool" @bind="objWarehouseConnection.LoginSecret" />
+                                                <br />
+                                                <!-- Button to save the forecast -->
+                                                <button class="btn btn-success" @onclick="SaveWarehouse"> Save</button>
+                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </th>
                     </tr>
                 </thead>
@@ -48,10 +75,10 @@
                             <td>@wh.LastUpdated</td>
                             <td align="right">
                                 <span>
-                                    <button class="button-primary" aria-hidden="true">
+                                    <button class="btn btn-primary" aria-hidden="true" @onclick="EditWarehouse">
                                         <i class="oi oi-pencil" />
                                     </button>
-                                    <button class="button-primary" aria-hidden="true">
+                                    <button class="btn btn-primary" aria-hidden="true" @onclick="DeleteWarehouse">
                                         <i class="oi oi-delete"></i>
                                     </button>
                                 </span>
@@ -91,5 +118,61 @@
             }
         }
 
+    }
+
+    WarehouseConnections objWarehouseConnection = new WarehouseConnections();
+    bool ShowPopup = false;
+
+    void ClosePopup()
+    {
+        // Close the Popup
+        ShowPopup = false;
+    }
+
+    void AddWarehouse()
+    {
+        // Make new forecast
+        objWarehouseConnection = new WarehouseConnections();
+        // Set Id to 0 so we know it is a new record
+        objWarehouseConnection.Id = 0;
+        // Open the Popup
+        ShowPopup = true;
+    }
+
+    async Task SaveWarehouse()
+    {
+        // Close the Popup
+        ShowPopup = false;
+        // A new forecast will have the Id set to 0
+        if (objWarehouseConnection.Id == 0)
+        {
+            // Create new forecast
+            var objNewWarehouse = new WarehouseConnections();
+            objNewWarehouse.DisplayName = objWarehouseConnection.DisplayName;
+            objNewWarehouse.ConnectionUri = objWarehouseConnection.ConnectionUri;
+            objNewWarehouse.LoginName = objWarehouseConnection.LoginName;
+            objNewWarehouse.LoginSecret = objWarehouseConnection.LoginSecret;
+            objNewWarehouse.LastUpdated = System.DateTime.Now;
+
+            // Save the result
+            var result = @Service.CreateWarehouseAsync(objNewWarehouse);
+        }
+        else
+        {
+            // This is an update
+        }
+
+        // Get the forecasts for the current user
+        warehouses = await @Service.GetWarehouseConnections();
+    }
+
+    void EditWarehouse()
+    {
+        
+    }
+
+    void DeleteWarehouse()
+    {
+        
     }
 }

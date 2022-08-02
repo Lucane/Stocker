@@ -23,7 +23,13 @@ public class WarehouseConnectionsService
 
     public async Task<List<WarehouseConnections>> GetWarehouseConnections()
     {
-        // Get Weather Forecasts  
         return await _context.WarehouseConnections.AsNoTracking().ToListAsync();
+    }
+
+    public Task<WarehouseConnections> CreateWarehouseAsync(WarehouseConnections objWarehouseConnection)
+    {
+        _context.WarehouseConnections.Add(objWarehouseConnection);
+        _context.SaveChanges();
+        return Task.FromResult(objWarehouseConnection);
     }
 }
