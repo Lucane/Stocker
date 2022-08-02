@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace StockerDB.Data.Stocker
 {
-    public partial class WarehouseConnections
+    public partial class WarehouseConnection
     {
         public int Id { get; set; }
         public string DisplayName { get; set; }

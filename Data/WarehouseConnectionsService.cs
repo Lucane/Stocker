@@ -21,15 +21,49 @@ public class WarehouseConnectionsService
         _context = context;
     }
 
-    public async Task<List<WarehouseConnections>> GetWarehouseConnections()
+    public async Task<List<WarehouseConnection>> GetWarehousesAsync()
     {
         return await _context.WarehouseConnections.AsNoTracking().ToListAsync();
     }
 
-    public Task<WarehouseConnections> CreateWarehouseAsync(WarehouseConnections objWarehouseConnection)
+    public Task<WarehouseConnection> CreateWarehouseAsync(WarehouseConnection objWarehouseConnection)
     {
         _context.WarehouseConnections.Add(objWarehouseConnection);
         _context.SaveChanges();
         return Task.FromResult(objWarehouseConnection);
+    }
+
+    public Task<bool> UpdateWarehouseAsync(WarehouseConnection objWarehouse)
+    {
+        var existingWarehouse = _context.WarehouseConnections
+                                              .Where(x => x.Id == objWarehouse.Id)
+                                              .FirstOrDefault();
+        if (existingWarehouse != null) {
+            existingWarehouse.DisplayName = objWarehouse.DisplayName;
+            existingWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
+            existingWarehouse.LoginName = objWarehouse.LoginName;
+            existingWarehouse.LoginSecret = objWarehouse.LoginSecret;
+            existingWarehouse.LastUpdated = System.DateTime.Now;
+
+            _context.SaveChanges();
+        } else {
+            return Task.FromResult(false);
+        }
+
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> DeleteWarehouseAsync(WarehouseConnection objWarehouse)
+    {
+        var objExistingWarehouse = _context.WarehouseConnections
+                                           .Where(x => x.Id == objWarehouse.Id)
+                                           .FirstOrDefault();
+        if (objExistingWarehouse != null) {
+            _context.WarehouseConnections.Remove(objExistingWarehouse);
+            _context.SaveChanges();
+        } else {
+            return Task.FromResult(false);
+        }
+        return Task.FromResult(true);
     }
 }

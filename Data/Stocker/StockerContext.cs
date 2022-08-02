@@ -18,12 +18,12 @@ namespace StockerDB.Data.Stocker
         {
         }
 
-        public virtual DbSet<WarehouseConnections> WarehouseConnections { get; set; }
+        public virtual DbSet<WarehouseConnection> WarehouseConnections { get; set; }
         public virtual DbSet<WeatherForecast> WeatherForecast { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<WarehouseConnections>(entity =>
+            modelBuilder.Entity<WarehouseConnection>(entity =>
             {
                 entity.Property(e => e.DisplayName).HasMaxLength(50);
 

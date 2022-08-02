@@ -43,7 +43,7 @@
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h3 class="modal-title">Edit Warehouse</h3>
+                                                <h3 class="modal-title">Muuda andmeid</h3>
                                                 <!-- Button to close the popup -->
                                                 <button class="btn btn-close" @onclick="ClosePopup">
                                                     <span aria-hidden="true" />
@@ -51,12 +51,11 @@
                                             </div>
                                             <!-- Edit form for the current forecast -->
                                             <div class="modal-body">
-                                                <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouseConnection.DisplayName" />
-                                                <input class="form-control" placeholder="API URI" @bind="objWarehouseConnection.ConnectionUri" />
-                                                <input class="form-control" placeholder="Kasutajanimi" @bind="objWarehouseConnection.LoginName" />
-                                                <input class="form-control" placeholder="Parool" @bind="objWarehouseConnection.LoginSecret" />
-                                                <br />
-                                                <!-- Button to save the forecast -->
+                                                <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouse.DisplayName"/><br/>
+                                                <input class="form-control" type="url" placeholder="API URI" @bind="objWarehouse.ConnectionUri" /><br/>
+                                                <input class="form-control" placeholder="Kasutajanimi" @bind="objWarehouse.LoginName" /><br>
+                                                <input class="form-control" type="password" placeholder="Parool" @bind="objWarehouse.LoginSecret" /><br/><br />
+                                                
                                                 <button class="btn btn-success" @onclick="SaveWarehouse"> Save</button>
                                              </div>
                                         </div>
@@ -75,12 +74,42 @@
                             <td>@wh.LastUpdated</td>
                             <td align="right">
                                 <span>
-                                    <button class="btn btn-primary" aria-hidden="true" @onclick="EditWarehouse">
+                                    <button class="btn btn-primary" aria-hidden="true" @onclick="(() => EditWarehouse(wh))">
                                         <i class="oi oi-pencil" />
                                     </button>
-                                    <button class="btn btn-primary" aria-hidden="true" @onclick="DeleteWarehouse">
+                                    <button class="btn btn-danger" aria-hidden="true" @onclick="(() => ConfirmRemoval(wh))">
                                         <i class="oi oi-delete"></i>
                                     </button>
+
+                                    @if (ShowRemovalPopup) {
+                                        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h3 class="modal-title">Eemalda väärtus</h3>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th align="left">
+                                                                        <button class="btn btn-primary" @onclick="ClosePopup">
+                                                                            Tühista
+                                                                        </button>
+                                                                    </th>
+                                                                    <th align="right">
+                                                                        <button class="btn btn-danger" @onclick="DeleteWarehouse">
+                                                                            Kustuta
+                                                                        </button>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                        </table>
+                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
                                 </span>
                             </td>
                         </tr>
@@ -100,7 +129,7 @@
     // AuthenticationState is available as a CascadingParameter
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationStateTask { get; set; }
-    List<WarehouseConnections> warehouses = new List<WarehouseConnections>();
+    List<WarehouseConnection> warehouses = new List<WarehouseConnection>();
 
     // no need to limit access to this page as of now
     //private string UserIdentityName = "";
@@ -114,28 +143,27 @@
             if (user.Identity != null)
             {
                 //UserIdentityName = user.Identity.Name ?? "";
-                warehouses = await @Service.GetWarehouseConnections();
+                warehouses = await @Service.GetWarehousesAsync();
             }
         }
 
     }
 
-    WarehouseConnections objWarehouseConnection = new WarehouseConnections();
+    WarehouseConnection objWarehouse = new WarehouseConnection();
     bool ShowPopup = false;
+    bool ShowRemovalPopup = false;
 
     void ClosePopup()
     {
         // Close the Popup
         ShowPopup = false;
+        ShowRemovalPopup = false;
     }
 
     void AddWarehouse()
     {
-        // Make new forecast
-        objWarehouseConnection = new WarehouseConnections();
-        // Set Id to 0 so we know it is a new record
-        objWarehouseConnection.Id = 0;
-        // Open the Popup
+        objWarehouse = new WarehouseConnection();
+        objWarehouse.Id = 0;
         ShowPopup = true;
     }
 
@@ -144,14 +172,14 @@
         // Close the Popup
         ShowPopup = false;
         // A new forecast will have the Id set to 0
-        if (objWarehouseConnection.Id == 0)
+        if (objWarehouse.Id == 0)
         {
             // Create new forecast
-            var objNewWarehouse = new WarehouseConnections();
-            objNewWarehouse.DisplayName = objWarehouseConnection.DisplayName;
-            objNewWarehouse.ConnectionUri = objWarehouseConnection.ConnectionUri;
-            objNewWarehouse.LoginName = objWarehouseConnection.LoginName;
-            objNewWarehouse.LoginSecret = objWarehouseConnection.LoginSecret;
+            var objNewWarehouse = new WarehouseConnection();
+            objNewWarehouse.DisplayName = objWarehouse.DisplayName;
+            objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
+            objNewWarehouse.LoginName = objWarehouse.LoginName;
+            objNewWarehouse.LoginSecret = objWarehouse.LoginSecret;
             objNewWarehouse.LastUpdated = System.DateTime.Now;
 
             // Save the result
@@ -159,20 +187,29 @@
         }
         else
         {
-            // This is an update
+            var result = @Service.UpdateWarehouseAsync(objWarehouse);
         }
 
         // Get the forecasts for the current user
-        warehouses = await @Service.GetWarehouseConnections();
+        warehouses = await @Service.GetWarehousesAsync();
     }
 
-    void EditWarehouse()
+    void EditWarehouse(WarehouseConnection warehouse)
     {
-        
+        objWarehouse = warehouse;
+        ShowPopup = true;
     }
 
-    void DeleteWarehouse()
+    void ConfirmRemoval(WarehouseConnection warehouse)
     {
-        
+        objWarehouse = warehouse;
+        ShowRemovalPopup = true;
+    }
+
+    async Task DeleteWarehouse()
+    {
+        var result = @Service.DeleteWarehouseAsync(objWarehouse);
+        warehouses = await @Service.GetWarehousesAsync();
+        ShowRemovalPopup = false;
     }
 }
