@@ -1,0 +1,225 @@
+﻿@page "/notebooks"
+@using Stocker.Data
+@using StockerDB.Data.Stocker
+@using Stocker.API.ALSO;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@*
+    Using OwningComponentBase ensures that the service and related services
+    that share its scope are disposed with the component.
+    Otherwise DbContext in ForecastService will live for the life of the
+    connection, which may be problematic if clients stay
+    connected for a long time.
+    We access WeatherForecastService using @Service
+*@
+@inherits OwningComponentBase<WarehouseConnectionsService>
+<h1>Hulgiladude API ühendused</h1>
+<!-- AuthorizeView allows us to only show sections of the page -->
+<!-- based on the security on the current user -->
+<AuthorizeView>
+    <!-- Show this section if the user is logged in -->
+    <Authorized>
+        <button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="UpdateData">
+            <i class="oi oi-key"></i>
+        </button>
+
+        @*<h4>Hello, @context.User.Identity?.Name!</h4>*@
+        @if (warehouses == null)
+        {
+            <!-- Show this if the current user has no data... yet... -->
+            <p><em>Laen andmeid...</em></p>
+        }
+        else
+        {
+            <!-- Show the forecasts for the current user -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ladu</th>
+                        <th>API URI</th>
+                        <th>Viimati muudetud</th>
+                        <th>
+                            <button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="AddWarehouse">
+                                <i class="oi oi-plus"></i>
+                            </button>
+                            @if (ShowPopup)
+                            {
+                                <!-- This is the popup to create or edit a forecast -->
+                                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title">Muuda andmeid</h3>
+                                                <!-- Button to close the popup -->
+                                                <button class="btn btn-close" @onclick="ClosePopup">
+                                                    <span aria-hidden="true" />
+                                                </button>
+                                            </div>
+                                            <!-- Edit form for the current forecast -->
+                                            <div class="modal-body">
+                                                <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouse.DisplayName"/><br/>
+                                                <input class="form-control" type="url" placeholder="API URI" @bind="objWarehouse.ConnectionUri" /><br/>
+                                                <input class="form-control" placeholder="Kasutajanimi" @bind="objWarehouse.LoginName" /><br>
+                                                <input class="form-control" type="password" placeholder="Parool" @bind="objWarehouse.LoginSecret" /><br/><br />
+                                                
+                                                <button class="btn btn-success" @onclick="SaveWarehouse"> Salvesta</button>
+                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var wh in warehouses)
+                    {
+                        <tr>
+                            <td>@wh.DisplayName</td>
+                            <td>@wh.ConnectionUri</td>
+                            <td>@wh.LastUpdated</td>
+                            <td align="right">
+                                <span>
+                                    <button class="btn btn-primary" aria-hidden="true" @onclick="(() => EditWarehouse(wh))">
+                                        <i class="oi oi-pencil" />
+                                    </button>
+                                    <button class="btn btn-danger" aria-hidden="true" @onclick="(() => ConfirmRemoval(wh))">
+                                        <i class="oi oi-delete"></i>
+                                    </button>
+
+                                    @if (ShowRemovalPopup) {
+                                        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h3 class="modal-title">Kustuta väärtus?</h3>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th align="left">
+                                                                        <button class="btn btn-primary" @onclick="ClosePopup">
+                                                                            Tühista
+                                                                        </button>
+                                                                    </th>
+                                                                    <th align="right">
+                                                                        <button class="btn btn-danger" @onclick="DeleteWarehouse">
+                                                                            Kustuta
+                                                                        </button>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                        </table>
+                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+    <!-- Show this section if the user is not logged in -->
+    <NotAuthorized>
+        <p>Selle lehe nägemiseks pead olema sisse logitud!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code 
+{
+    // AuthenticationState is available as a CascadingParameter
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+    List<WarehouseConnection> warehouses = new List<WarehouseConnection>();
+
+    // no need to limit access to this page as of now
+    //private string UserIdentityName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get the current user
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                //UserIdentityName = user.Identity.Name ?? "";
+                warehouses = await @Service.GetWarehousesAsync();
+            }
+        }
+
+    }
+
+    WarehouseConnection objWarehouse = new WarehouseConnection();
+    bool ShowPopup = false;
+    bool ShowRemovalPopup = false;
+
+    void ClosePopup()
+    {
+        // Close the Popup
+        ShowPopup = false;
+        ShowRemovalPopup = false;
+    }
+
+    void AddWarehouse()
+    {
+        objWarehouse = new WarehouseConnection();
+        objWarehouse.Id = 0;
+        ShowPopup = true;
+    }
+
+    async Task SaveWarehouse()
+    {
+        // Close the Popup
+        ShowPopup = false;
+        // A new forecast will have the Id set to 0
+        if (objWarehouse.Id == 0)
+        {
+            // Create new forecast
+            var objNewWarehouse = new WarehouseConnection();
+            objNewWarehouse.DisplayName = objWarehouse.DisplayName;
+            objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
+            objNewWarehouse.LoginName = objWarehouse.LoginName;
+            objNewWarehouse.LoginSecret = objWarehouse.LoginSecret;
+            objNewWarehouse.LastUpdated = System.DateTime.Now;
+
+            // Save the result
+            var result = @Service.CreateWarehouseAsync(objNewWarehouse);
+        }
+        else
+        {
+            var result = @Service.UpdateWarehouseAsync(objWarehouse);
+        }
+
+        // Get the forecasts for the current user
+        warehouses = await @Service.GetWarehousesAsync();
+    }
+
+    void EditWarehouse(WarehouseConnection warehouse)
+    {
+        objWarehouse = warehouse;
+        ShowPopup = true;
+    }
+
+    void ConfirmRemoval(WarehouseConnection warehouse)
+    {
+        objWarehouse = warehouse;
+        ShowRemovalPopup = true;
+    }
+
+    async Task DeleteWarehouse()
+    {
+        var result = @Service.DeleteWarehouseAsync(objWarehouse);
+        warehouses = await @Service.GetWarehousesAsync();
+        ShowRemovalPopup = false;
+    }
+
+    public void UpdateData()
+    {
+        Xml.GetXmlRequest();
+    }
+}

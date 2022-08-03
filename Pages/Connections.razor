@@ -1,4 +1,4 @@
-﻿@page "/hulgilaod"
+﻿@page "/connections"
 @using Stocker.Data
 @using StockerDB.Data.Stocker
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -30,7 +30,7 @@
                 <thead>
                     <tr>
                         <th>Ladu</th>
-                        <th>API URI</th>
+                        <th>API URL</th>
                         <th>Viimati muudetud</th>
                         <th>
                             <button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="AddWarehouse">
@@ -52,11 +52,11 @@
                                             <!-- Edit form for the current forecast -->
                                             <div class="modal-body">
                                                 <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouse.DisplayName"/><br/>
-                                                <input class="form-control" type="url" placeholder="API URI" @bind="objWarehouse.ConnectionUri" /><br/>
+                                                <input class="form-control" type="url" placeholder="API URL" @bind="objWarehouse.ConnectionUri" /><br/>
                                                 <input class="form-control" placeholder="Kasutajanimi" @bind="objWarehouse.LoginName" /><br>
                                                 <input class="form-control" type="password" placeholder="Parool" @bind="objWarehouse.LoginSecret" /><br/><br />
                                                 
-                                                <button class="btn btn-success" @onclick="SaveWarehouse"> Save</button>
+                                                <button class="btn btn-success" @onclick="SaveWarehouse"> Salvesta</button>
                                              </div>
                                         </div>
                                     </div>
