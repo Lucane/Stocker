@@ -18,12 +18,13 @@ namespace StockerDB.Data.Stocker
         {
         }
 
-        public virtual DbSet<WarehouseConnection> WarehouseConnections { get; set; }
+        public virtual DbSet<WarehouseConnections> WarehouseConnections { get; set; }
+        public virtual DbSet<WarehouseProducts_ALSO> WarehouseProducts_ALSO { get; set; }
         public virtual DbSet<WeatherForecast> WeatherForecast { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<WarehouseConnection>(entity =>
+            modelBuilder.Entity<WarehouseConnections>(entity =>
             {
                 entity.Property(e => e.DisplayName).HasMaxLength(50);
 
@@ -32,6 +33,33 @@ namespace StockerDB.Data.Stocker
                 entity.Property(e => e.LoginName).HasMaxLength(50);
 
                 entity.Property(e => e.LoginSecret).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<WarehouseProducts_ALSO>(entity =>
+            {
+                entity.Property(e => e.BidEndUser).HasMaxLength(1000);
+
+                entity.Property(e => e.BidPrice).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.BidValidFrom).HasColumnType("datetime");
+
+                entity.Property(e => e.BidValidTill).HasColumnType("datetime");
+
+                entity.Property(e => e.Description).HasMaxLength(4000);
+
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
+                entity.Property(e => e.PartNumber).HasMaxLength(100);
+
+                entity.Property(e => e.Price_EE).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.Price_FI).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.Price_LT).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.Price_LV).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.Warranty).HasMaxLength(1000);
             });
 
             modelBuilder.Entity<WeatherForecast>(entity =>

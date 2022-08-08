@@ -1,7 +1,8 @@
 ﻿@page "/notebooks"
 @using Stocker.Data
 @using StockerDB.Data.Stocker
-@using Stocker.API.ALSO;
+@using System.Net.Http.Json
+@using MudBlazor
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @*
     Using OwningComponentBase ensures that the service and related services
@@ -11,19 +12,136 @@
     connected for a long time.
     We access WeatherForecastService using @Service
 *@
-@inherits OwningComponentBase<WarehouseConnectionsService>
-<h1>Hulgiladude API ühendused</h1>
+@*@inherits OwningComponentBase<WarehouseConnectionsService>*@
+@inherits OwningComponentBase<WarehouseProductsService>
+
+<style>
+    .badge {
+        background-color: #54CF87;
+        color: white;
+        padding: 4px 8px;
+        text-align: center;
+        border-radius: 10px;
+    }
+</style>
+
+<PageTitle>Sülearvutid</PageTitle>
+
 <!-- AuthorizeView allows us to only show sections of the page -->
 <!-- based on the security on the current user -->
 <AuthorizeView>
     <!-- Show this section if the user is logged in -->
     <Authorized>
-        <button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="UpdateData">
+        @*<button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="UpdateData">
             <i class="oi oi-key"></i>
-        </button>
+        </button>*@
 
+        @*@if (products == null)
+        {
+            <!-- Show this if the current user has no data... yet... -->
+            <p><em>Laen andmeid...</em></p>
+        }
+        else {}*@
+        <MudBlazor.MudTable Items="products" OnRowClick="ShowBtnPress" T="WarehouseProducts_ALSO"
+        Dense=true FixedHeader=true Context="tableContext" Hover=true Elevation="5" Outlined=false
+        SortLabel="Sort By" Filter="new Func<WarehouseProducts_ALSO,bool>(FilterFunc)" Height="100%">
+            <ColGroup>
+                <col />
+                <col style="width: auto" />
+                <col style="flex-wrap: nowrap" />
+                <col style="flex-wrap: nowrap" />
+            </ColGroup>
+
+            <ToolBarContent>
+                @*<MudText Typo="Typo.h6">Laoseis</MudText>*@
+                    
+                <MudChipSet MultiSelection="true" Style="display: flex" @bind-SelectedChips="selectedChips">
+                    <MudChip Text="ACC" Default=true Variant="Variant.Text" Color="Color.Info" Size="Size.Small">Ladu:ACC</MudChip>
+                    <MudChip Text="ALSO" Default=true Variant="Variant.Text" Color="Color.Info" Size="Size.Small">Ladu:ALSO</MudChip>
+                    <MudChip Text="F9" Default=true Variant="Variant.Text" Color="Color.Info" Size="Size.Small">Ladu:F9</MudChip>
+                    <MudChip Text="InStock" Default=true Variant="Variant.Text" Color="Color.Success" OnClick="FilterChips" Size="Size.Small">Laos</MudChip>
+                    <MudChip Text="Incoming" Default=true Variant="Variant.Text" Color="Color.Warning" Disabled=true OnClick="FilterChips" Size="Size.Small">Saabumas</MudChip>
+                    <MudChip Text="OutOfStock" Default=false Variant="Variant.Text" Color="Color.Error" OnClick="FilterChips" Size="Size.Small">Laost otsas</MudChip>
+                    <MudChip Text="ESD" Default=true Variant="Variant.Text" Color="Color.Primary" OnClick="FilterChips" Size="Size.Small">ESD</MudChip>
+                </MudChipSet>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Otsi toodet" Adornment="Adornment.Start" Immediate=true
+                            FullWidth=true AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+                </MudTextField>
+            </ToolBarContent>
+
+            <HeaderContent>
+                @*<MudBlazor.MudTh>Part Number</MudBlazor.MudTh>
+                <MudBlazor.MudTh>Description</MudBlazor.MudTh>
+                <MudBlazor.MudTh>Stock EE</MudBlazor.MudTh>
+                <MudBlazor.MudTh>Price EE</MudBlazor.MudTh>*@
+                <MudTh Style="background-color: #78A289; color: #ffffff; font-weight: 1000; border-radius: 0px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<WarehouseProducts_ALSO, object>(x=>x.PartNumber)">Tootekood</MudTableSortLabel></MudTh>
+                <MudTh Style="background-color: #78A289; color: #ffffff; font-weight: 1000"><MudTableSortLabel SortBy="new Func<WarehouseProducts_ALSO, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
+                <MudTh Style="background-color: #78A289; color: #ffffff; font-weight: 1000"><MudTableSortLabel SortBy="new Func<WarehouseProducts_ALSO, object>(x=>x.Stock_EE)"></MudTableSortLabel></MudTh>
+                <MudTh Style="background-color: #78A289; color: #ffffff; font-weight: 1000; border-radius: 0px"><MudTableSortLabel SortBy="new Func<WarehouseProducts_ALSO, object>(x=>x.Price_EE)">Hind</MudTableSortLabel></MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudBlazor.MudTd class="cursor-pointer" DataLabel="PartNumber">@tableContext.PartNumber</MudBlazor.MudTd>
+                <MudBlazor.MudTd class="cursor-pointer" DataLabel="Description">@tableContext.Description</MudBlazor.MudTd>
+                <MudBlazor.MudTd class="cursor-pointer" DataLabel="Stock_EE" Style="vertical-align: central; text-align: center; font-weight: 500">
+                    @if (tableContext.CarePack == 1) {
+                        <div class="badge">ESD</div>
+                    } else if (tableContext.Stock_EE > 0) {
+                        <MudTooltip Text="Laos" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                            <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />@*@tableContext.Stock_EE*@
+                        </MudTooltip>
+                    } else if (tableContext.Stock_EE > 0) {
+                        <MudTooltip Text="Saabumas" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                            <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCartCheckout" Color="Color.Warning" />
+                        </MudTooltip>
+                    } else if (tableContext.Stock_EE == 0) {
+                        <MudTooltip Text="Laost otsas" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                            <MudIcon Icon="@Icons.Material.TwoTone.RemoveShoppingCart" Color="Color.Error" />
+                        </MudTooltip>
+                        
+                    }
+                    </MudBlazor.MudTd>
+                <MudBlazor.MudTd class="cursor-pointer" DataLabel="Price_EE" Style="text-align: right; white-space: nowrap; font-weight: 500">@tableContext.Price_EE €</MudBlazor.MudTd>
+            </RowTemplate>
+            <ChildRowContent>
+		        @if (tableContext.Id == showDetails && tableContext.Stock_FI > 0)
+				    {
+                    <MudTr>
+                    <td colspan="4">
+	                <MudCard Square=true Outlined=true Style="background-color: #78A289">
+	                    @*<MudCardHeader>
+	                    <CardHeaderContent>
+	                        <MudText Typo="Typo.body1"><strong>@tableContext.Description</strong></MudText>
+	                    </CardHeaderContent>
+	                    </MudCardHeader>*@
+	                    <MudCardContent>
+	                        <MudTable Items="products.Where(x => x.Id == showDetails)" Context="childContext" Hover="true" Elevation="0">
+	                            <ColGroup>
+                                    <col style="width:200px;" />
+		                            <col style="width:200px;" />
+		                            <col />
+	                            </ColGroup>
+	                            <HeaderContent>
+                                    <MudTh />
+                                    <MudTh>BID Customer</MudTh>
+		                            <MudTh>BID Created</MudTh>
+	                            </HeaderContent>
+	                            <RowTemplate>
+                                    <MudTd />
+		                            <MudTd DataLabel="Stock_FI">@childContext.Stock_FI</MudTd>
+		                            <MudTd DataLabel="Price_FI">@childContext.Price_FI</MudTd>
+	                            </RowTemplate>
+	                        </MudTable>
+	                    </MudCardContent>
+	                </MudCard>
+                    </td>
+                    </MudTr>
+		            }
+	        </ChildRowContent>
+        </MudBlazor.MudTable>
         @*<h4>Hello, @context.User.Identity?.Name!</h4>*@
-        @if (warehouses == null)
+        @*@if (warehouses == null)
         {
             <!-- Show this if the current user has no data... yet... -->
             <p><em>Laen andmeid...</em></p>
@@ -121,7 +239,7 @@
                     }
                 </tbody>
             </table>
-        }
+        }*@
     </Authorized>
     <!-- Show this section if the user is not logged in -->
     <NotAuthorized>
@@ -134,13 +252,25 @@
     // AuthenticationState is available as a CascadingParameter
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationStateTask { get; set; }
-    List<WarehouseConnection> warehouses = new List<WarehouseConnection>();
+    //List<WarehouseConnection> warehouses = new List<WarehouseConnection>();
+    List<WarehouseProducts_ALSO> products = new List<WarehouseProducts_ALSO>();
+
+    private string searchString = "";
+    //MudChip[] selectedChips = new MudChip[chipStockACC, chipStockALSO, chipStockF9, chipInStock];
+    private bool inStock = true;
+    private bool stockACC = true;
+    private bool stockALSO = true;
+    private bool stockF9 = true;
+    private int showDetails = -1;
+    MudChip[] selectedChips;
 
     // no need to limit access to this page as of now
     //private string UserIdentityName = "";
 
     protected override async Task OnInitializedAsync()
     {
+        //System.Diagnostics.Debug.WriteLine("------------------- Initializing page 'notebooks'");
+
         // Get the current user
         if (authenticationStateTask != null)
         {
@@ -148,78 +278,126 @@
             if (user.Identity != null)
             {
                 //UserIdentityName = user.Identity.Name ?? "";
-                warehouses = await @Service.GetWarehousesAsync();
+                //products = await @Service.GetAllProductsAsync();
+                await FilterChips();
             }
         }
 
     }
 
-    WarehouseConnection objWarehouse = new WarehouseConnection();
-    bool ShowPopup = false;
-    bool ShowRemovalPopup = false;
+    //WarehouseProductsAlso objProducts = new WarehouseProductsAlso();
+    //bool ShowPopup = false;
+    //bool ShowRemovalPopup = false;
 
-    void ClosePopup()
+    //void ClosePopup()
+    //{
+    //    // Close the Popup
+    //    ShowPopup = false;
+    //    ShowRemovalPopup = false;
+    //}
+
+    //void AddWarehouse()
+    //{
+    //    objWarehouse = new WarehouseProductsAlso();
+    //    objWarehouse.Id = 0;
+    //    ShowPopup = true;
+    //}
+
+    //async Task SaveWarehouse()
+    //{
+    //    // Close the Popup
+    //    ShowPopup = false;
+    //    // A new forecast will have the Id set to 0
+    //    if (objWarehouse.Id == 0)
+    //    {
+    //        // Create new forecast
+    //        var objNewWarehouse = new WarehouseConnection();
+    //        objNewWarehouse.DisplayName = objWarehouse.DisplayName;
+    //        objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
+    //        objNewWarehouse.LoginName = objWarehouse.LoginName;
+    //        objNewWarehouse.LoginSecret = objWarehouse.LoginSecret;
+    //        objNewWarehouse.LastUpdated = System.DateTime.Now;
+
+    //        // Save the result
+    //        var result = @Service.CreateWarehouseAsync(objNewWarehouse);
+    //    }
+    //    else
+    //    {
+    //        var result = @Service.UpdateWarehouseAsync(objWarehouse);
+    //    }
+
+    //    // Get the forecasts for the current user
+    //    warehouses = await @Service.GetWarehousesAsync();
+    //}
+
+    //void EditWarehouse(WarehouseConnection warehouse)
+    //{
+    //    objWarehouse = warehouse;
+    //    ShowPopup = true;
+    //}
+
+    //void ConfirmRemoval(WarehouseConnection warehouse)
+    //{
+    //    objWarehouse = warehouse;
+    //    ShowRemovalPopup = true;
+    //}
+
+    //async Task DeleteWarehouse()
+    //{
+    //    var result = @Service.DeleteWarehouseAsync(objWarehouse);
+    //    warehouses = await @Service.GetWarehousesAsync();
+    //    ShowRemovalPopup = false;
+    //}
+
+    async Task UpdateData()
     {
-        // Close the Popup
-        ShowPopup = false;
-        ShowRemovalPopup = false;
+        var result = await @Service.PopulateDatabaseAsync();
     }
 
-    void AddWarehouse()
+    private bool FilterFunc(WarehouseProducts_ALSO element)
     {
-        objWarehouse = new WarehouseConnection();
-        objWarehouse.Id = 0;
-        ShowPopup = true;
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.PartNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        //if ($"{element.Number} {element.Position} {element.Molar}".Contains(searchString))
+        //    return true;
+        return false;
     }
 
-    async Task SaveWarehouse()
+    private async Task FilterChips()
     {
-        // Close the Popup
-        ShowPopup = false;
-        // A new forecast will have the Id set to 0
-        if (objWarehouse.Id == 0)
-        {
-            // Create new forecast
-            var objNewWarehouse = new WarehouseConnection();
-            objNewWarehouse.DisplayName = objWarehouse.DisplayName;
-            objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
-            objNewWarehouse.LoginName = objWarehouse.LoginName;
-            objNewWarehouse.LoginSecret = objWarehouse.LoginSecret;
-            objNewWarehouse.LastUpdated = System.DateTime.Now;
 
-            // Save the result
-            var result = @Service.CreateWarehouseAsync(objNewWarehouse);
+        //foreach (var chip in selectedChips) {
+        //foreach (var c in selectedChips) {
+        //    System.Diagnostics.Debug.WriteLine(c.Text + " : " + c.IsSelected + products.ElementAt(0).CarePack);
+        //}
+
+        //products = await @Service.GetAllProductsAsync();
+        products = (await @Service.GetAllProductsAsync()).Where(x => selectedChips.Any(chip => (chip.Text == "InStock" && x.Stock_EE > 0 && x.CarePack == 0)
+                                                                                            || (chip.Text == "OutOfStock" && x.Stock_EE == 0 && x.CarePack == 0)
+                                                                                            || (chip.Text == "ESD" && x.CarePack == 1)
+                                                                                            )).ToList();
+
+        //products = products.Where(x => chip.IsSelected && chip.Text == "OutOfStock" && x.Stock_EE == 0).ToList();
+        //}
+        //if (inStock) products = products.Where(x => x.Stock_EE > 0).ToList();
+    }
+
+    private void ShowBtnPress(TableRowClickEventArgs<WarehouseProducts_ALSO> args)
+    {
+        if (args == null || args.Item == null) return;
+        System.Diagnostics.Debug.WriteLine(args.Item.Id + " : " + showDetails);
+
+        if (args.Item.Id == showDetails) {
+            showDetails = -1;
+            return;
         }
-        else
-        {
-            var result = @Service.UpdateWarehouseAsync(objWarehouse);
-        }
 
-        // Get the forecasts for the current user
-        warehouses = await @Service.GetWarehousesAsync();
-    }
-
-    void EditWarehouse(WarehouseConnection warehouse)
-    {
-        objWarehouse = warehouse;
-        ShowPopup = true;
-    }
-
-    void ConfirmRemoval(WarehouseConnection warehouse)
-    {
-        objWarehouse = warehouse;
-        ShowRemovalPopup = true;
-    }
-
-    async Task DeleteWarehouse()
-    {
-        var result = @Service.DeleteWarehouseAsync(objWarehouse);
-        warehouses = await @Service.GetWarehousesAsync();
-        ShowRemovalPopup = false;
-    }
-
-    public void UpdateData()
-    {
-        Xml.GetXmlRequest();
+        showDetails = args.Item.Id;
+        //WarehouseProducts_ALSO tmpPerson = products.First(x => x.Id == ID);
+        //showDetails = ;
     }
 }

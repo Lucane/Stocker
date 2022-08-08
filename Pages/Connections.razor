@@ -129,7 +129,7 @@
     // AuthenticationState is available as a CascadingParameter
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationStateTask { get; set; }
-    List<WarehouseConnection> warehouses = new List<WarehouseConnection>();
+    List<WarehouseConnections> warehouses = new List<WarehouseConnections>();
 
     // no need to limit access to this page as of now
     //private string UserIdentityName = "";
@@ -149,7 +149,7 @@
 
     }
 
-    WarehouseConnection objWarehouse = new WarehouseConnection();
+    WarehouseConnections objWarehouse = new WarehouseConnections();
     bool ShowPopup = false;
     bool ShowRemovalPopup = false;
 
@@ -162,7 +162,7 @@
 
     void AddWarehouse()
     {
-        objWarehouse = new WarehouseConnection();
+        objWarehouse = new WarehouseConnections();
         objWarehouse.Id = 0;
         ShowPopup = true;
     }
@@ -175,7 +175,7 @@
         if (objWarehouse.Id == 0)
         {
             // Create new forecast
-            var objNewWarehouse = new WarehouseConnection();
+            var objNewWarehouse = new WarehouseConnections();
             objNewWarehouse.DisplayName = objWarehouse.DisplayName;
             objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
             objNewWarehouse.LoginName = objWarehouse.LoginName;
@@ -194,13 +194,13 @@
         warehouses = await @Service.GetWarehousesAsync();
     }
 
-    void EditWarehouse(WarehouseConnection warehouse)
+    void EditWarehouse(WarehouseConnections warehouse)
     {
         objWarehouse = warehouse;
         ShowPopup = true;
     }
 
-    void ConfirmRemoval(WarehouseConnection warehouse)
+    void ConfirmRemoval(WarehouseConnections warehouse)
     {
         objWarehouse = warehouse;
         ShowRemovalPopup = true;

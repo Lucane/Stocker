@@ -21,19 +21,19 @@ public class WarehouseConnectionsService
         _context = context;
     }
 
-    public async Task<List<WarehouseConnection>> GetWarehousesAsync()
+    public async Task<List<WarehouseConnections>> GetWarehousesAsync()
     {
         return await _context.WarehouseConnections.AsNoTracking().ToListAsync();
     }
 
-    public Task<WarehouseConnection> CreateWarehouseAsync(WarehouseConnection objWarehouseConnection)
+    public Task<WarehouseConnections> CreateWarehouseAsync(WarehouseConnections objWarehouseConnection)
     {
         _context.WarehouseConnections.Add(objWarehouseConnection);
         _context.SaveChanges();
         return Task.FromResult(objWarehouseConnection);
     }
 
-    public Task<bool> UpdateWarehouseAsync(WarehouseConnection objWarehouse)
+    public Task<bool> UpdateWarehouseAsync(WarehouseConnections objWarehouse)
     {
         var existingWarehouse = _context.WarehouseConnections
                                               .Where(x => x.Id == objWarehouse.Id)
@@ -53,7 +53,7 @@ public class WarehouseConnectionsService
         return Task.FromResult(true);
     }
 
-    public Task<bool> DeleteWarehouseAsync(WarehouseConnection objWarehouse)
+    public Task<bool> DeleteWarehouseAsync(WarehouseConnections objWarehouse)
     {
         var objExistingWarehouse = _context.WarehouseConnections
                                            .Where(x => x.Id == objWarehouse.Id)
