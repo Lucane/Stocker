@@ -14,7 +14,19 @@
    "SelectedToBeGenerated": 0,
    "Tables": [
       {
+         "Name": "[dbo].[PartsList]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PartsStock]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[WarehouseConnections]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WarehouseProducts]",
          "ObjectType": 0
       },
       {

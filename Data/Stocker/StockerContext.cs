@@ -18,12 +18,63 @@ namespace StockerDB.Data.Stocker
         {
         }
 
+        public virtual DbSet<PartsList> PartsList { get; set; }
+        public virtual DbSet<PartsStock> PartsStock { get; set; }
         public virtual DbSet<WarehouseConnections> WarehouseConnections { get; set; }
+        public virtual DbSet<WarehouseProducts> WarehouseProducts { get; set; }
         public virtual DbSet<WarehouseProducts_ALSO> WarehouseProducts_ALSO { get; set; }
         public virtual DbSet<WeatherForecast> WeatherForecast { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<PartsList>(entity =>
+            {
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
+                entity.Property(e => e.ModelName).HasMaxLength(100);
+
+                entity.Property(e => e.ModelType).HasMaxLength(4);
+
+                entity.Property(e => e.PartCategory).HasMaxLength(200);
+
+                entity.Property(e => e.PartDescription).HasMaxLength(1000);
+
+                entity.Property(e => e.PartImages).HasColumnType("xml");
+
+                entity.Property(e => e.PartNumber)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<PartsStock>(entity =>
+            {
+                entity.Property(e => e.Date_Incoming_CH).HasColumnType("datetime");
+
+                entity.Property(e => e.Date_Incoming_DK).HasColumnType("datetime");
+
+                entity.Property(e => e.Date_Incoming_NL).HasColumnType("datetime");
+
+                entity.Property(e => e.Date_Incoming_UK).HasColumnType("datetime");
+
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
+                entity.Property(e => e.PartNumber)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Price_CH).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Price_DK).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Price_NL).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Price_UK).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Warehouse)
+                    .IsRequired()
+                    .HasMaxLength(50);
+            });
+
             modelBuilder.Entity<WarehouseConnections>(entity =>
             {
                 entity.Property(e => e.DisplayName).HasMaxLength(50);
@@ -35,11 +86,44 @@ namespace StockerDB.Data.Stocker
                 entity.Property(e => e.LoginSecret).HasMaxLength(50);
             });
 
+            modelBuilder.Entity<WarehouseProducts>(entity =>
+            {
+                entity.Property(e => e.BidEndUser).HasMaxLength(1000);
+
+                entity.Property(e => e.BidPrice).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.BidValidFrom).HasColumnType("datetime");
+
+                entity.Property(e => e.BidValidTill).HasColumnType("datetime");
+
+                entity.Property(e => e.Category).HasMaxLength(200);
+
+                entity.Property(e => e.Date_Incoming).HasColumnType("datetime");
+
+                entity.Property(e => e.Description).HasMaxLength(4000);
+
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
+                entity.Property(e => e.PartNumber)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Price_Local).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Price_Remote).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Warehouse)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Warranty).HasMaxLength(1000);
+            });
+
             modelBuilder.Entity<WarehouseProducts_ALSO>(entity =>
             {
                 entity.Property(e => e.BidEndUser).HasMaxLength(1000);
 
-                entity.Property(e => e.BidPrice).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.BidPrice).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.BidValidFrom).HasColumnType("datetime");
 
@@ -51,13 +135,13 @@ namespace StockerDB.Data.Stocker
 
                 entity.Property(e => e.PartNumber).HasMaxLength(100);
 
-                entity.Property(e => e.Price_EE).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.Price_EE).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.Price_FI).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.Price_FI).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.Price_LT).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.Price_LT).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.Price_LV).HasColumnType("decimal(18, 4)");
+                entity.Property(e => e.Price_LV).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.Warranty).HasMaxLength(1000);
             });

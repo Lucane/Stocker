@@ -27,6 +27,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 builder.Services.AddScoped<WarehouseProductsService>();
 builder.Services.AddScoped<WarehouseConnectionsService>();
 builder.Services.AddScoped<WeatherForecastService>();
+//builder.Services.AddScoped<Stocker.API.ACC.ApiCaller>();
 
 builder.Services.AddDbContext<StockerDB.Data.Stocker.StockerContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

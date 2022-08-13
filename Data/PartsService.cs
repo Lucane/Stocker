@@ -1,11 +1,13 @@
-using System.Xml.Linq;
 using StockerDB.Data.Stocker;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using System.Data;
-
+using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Stocker.Data;
-public class WarehouseProductsService
+public class StockService
 {
 
     //public Task<WarehouseConnections[]> GetWarehouseConnections()
@@ -14,14 +16,19 @@ public class WarehouseProductsService
     //}
 
     private readonly StockerContext _context;
-    public WarehouseProductsService(StockerContext context)
+    public StockService(StockerContext context)
     {
         _context = context;
     }
 
-    public async Task<List<WarehouseProducts>> GetAllProductsAsync()
+    public async Task<List<WarehouseProducts_ALSO>> GetAllProductsAsync()
     {
-        return await _context.WarehouseProducts.AsNoTracking().ToListAsync();
+        return await _context.WarehouseProducts_ALSO.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<bool> RetrievePartsListFromSessionStorage()
+    {
+        return await Task.FromResult(false);
     }
 
     public async Task<bool> PopulateDatabaseAsync()
@@ -136,42 +143,13 @@ public class WarehouseProductsService
         return await Task.FromResult(true);
     }
 
-    public async Task<bool> PopDB()
+
+
+    public Task<WarehouseProducts_ALSO> CreateProductAsync(WarehouseProducts_ALSO objWarehouseConnection)
     {
-        //await _context.Database.ExecuteSqlRawAsync("delete from dbo.WarehouseProducts");
-
-        API.ACC.ApiCaller caller_ACC = new API.ACC.ApiCaller(_context);
-        //API.ALSO.ApiCaller caller_ALSO = new API.ALSO.ApiCaller(_context);
-
-        //API.F9.ApiCaller caller_F9 = new API.F9.ApiCaller(_context);
-        //var response = await caller_F9.RequestApi();
-        //System.Diagnostics.Debug.WriteLine(response);
-
-        await caller_ACC.GetProducts();
-        //await caller_ALSO.GetProducts();
-
-        //if (response_ACC) await _context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.WarehouseProducts WHERE Warehouse = ACC");
-        //if (response_ALSO) await _context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.WarehouseProducts WHERE Warehouse = ALSO");
-
-        return await Task.FromResult(true);
-        //return await caller.GetProducts();
-    }
-
-    public Task<WarehouseProducts> CreateProductAsync(WarehouseProducts objWarehouseConnection)
-    {
-        _context.WarehouseProducts.Add(objWarehouseConnection);
+        _context.WarehouseProducts_ALSO.Add(objWarehouseConnection);
         _context.SaveChanges();
         return Task.FromResult(objWarehouseConnection);
-    }
-
-    public Task<List<WarehouseProducts>> CreateProductsAsync(List<WarehouseProducts> objWarehouseProducts)
-    {
-        foreach (var product in objWarehouseProducts) {
-            _context.WarehouseProducts.Add(product);
-        }
-        
-        _context.SaveChanges();
-        return Task.FromResult(objWarehouseProducts);
     }
 
     public Task<bool> UpdateProductAsync(WarehouseProducts_ALSO objProducts)
