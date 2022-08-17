@@ -73,40 +73,6 @@ public class ApiCaller
 
     public async Task<bool> PopulateDatabase(string content)
     {
-        //var builder = WebApplication.CreateBuilder(args);
-
-        //// Add services to the container.
-        //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        //builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        //    options.UseSqlServer(connectionString));
-
-
-        //var connection = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-        //Server=(localdb)\\mssqllocaldb;Database=aspnet-Stocker-6BAD2BE6-E604-46F3-8699-1B4A5DC57709
-        //var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-        //    .UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=aspnet-Stocker-6BAD2BE6-E604-46F3-8699-1B4A5DC57709")
-        //    .Options;
-        //using var dbContext = new ApplicationDbContext(contextOptions);
-        //var optionsBuilder = new DbContextOptionsBuilder();
-        //optionsBuilder.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]);
-        //var dbContext = new StockerDB.Data.Stocker.StockerContext();
-        //var context = new StockerDB.Data.Stocker.StockerContext(optionsBuilder.Options);
-
-        //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        //builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        //    options.UseSqlServer(connectionString));
-
-
-
-        //content = content.Replace(@"\""", @"\u0022");
-
-        //var contentClean = HttpUtility.JavaScriptStringEncode(content);
-
-        //JsonSerializerOptions jso = new() {
-        //    AllowTrailingCommas = true,
-        //    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        //};
-
         if (String.IsNullOrWhiteSpace(content)) return await Task.FromResult(false);
 
         Rootobject responseObject = null;
@@ -125,9 +91,10 @@ public class ApiCaller
         var allProducts = new List<WarehouseProducts>();
 
         await _context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.WarehouseProducts WHERE Warehouse='ACC'");
+        var updatedAt = DateTime.Now;
 
         foreach (var product in responseObject.Products) {
-            if (product.Producer.OId != "LV") continue;
+            //if (product.Producer.OId != "LV") continue;
 
             var newProduct = new WarehouseProducts();
 
@@ -135,7 +102,7 @@ public class ApiCaller
             newProduct.Category = product.Branches.FirstOrDefault()?.Name;
             newProduct.Date_Incoming = product.Stocks.Where(x => x.WhId == null && x.AmountOrderedArrivingDiff > (decimal)0.0).FirstOrDefault()?.ExpectedDate;
             newProduct.Description = product.Name;
-            newProduct.LastUpdated = product.UpdatedAt;
+            newProduct.LastUpdated = updatedAt;
             newProduct.PartNumber = product.MPN;
             newProduct.Price_Local = product.Price.Value;
             newProduct.Stock_Incoming = Convert.ToInt32(product.Stocks.Where(x => x.WhId == null && x.AmountOrderedArrivingDiff > (decimal)0.0).FirstOrDefault()?.AmountOrderedArrivingDiff);

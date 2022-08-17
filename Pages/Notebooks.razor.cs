@@ -5,6 +5,8 @@ using MudBlazor;
 using Stocker.API;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Threading.Tasks;
+using Microsoft.JSInterop;
 
 
 namespace Stocker.Pages;
@@ -129,7 +131,9 @@ public partial class Notebooks
         //var result = await @Service.PopulateDatabaseAsync();
         //var result = API.ALSO.Xml.GetXmlRequest(API.ALSO.Xml.Warehouse.ACC);
         //var result = await API.ACC.ApiCaller.GetProducts();
+        //var result = await API.F9.ApiCaller.GetProducts();
         var result = await @Service.PopDB();
+        //System.Diagnostics.Debug.WriteLine(result);
     }
 
     private bool FilterFunc(Product element)
@@ -174,17 +178,17 @@ public partial class Notebooks
 
         products = await @Service.GetAllProductsAsync();
 
-        var newList = products.Where(x => selectedChips.Any(chip => ((chip.Text == "InStock" && x.Stock_Local > 0 && x.CarePack == 0)
-                                                                  || (chip.Text == "Incoming" && x.Stock_Local == 0 && x.Stock_Incoming > 0 && x.CarePack == 0)
-                                                                  || (chip.Text == "OutOfStock" && x.Stock_Local == 0 && x.Stock_Incoming == 0 && x.CarePack == 0)
+        var newList = products.Where(x => selectedChips.Any(chip => ((chip.Text == "InStock" && x.Stock_Local > 0 && (x.CarePack ?? 0) == 0)
+                                                                  || (chip.Text == "Incoming" && (x.Stock_Local ?? 0) == 0 && (x.Stock_Incoming > 0 || x.Date_Incoming != null) && (x.CarePack ?? 0) == 0)
+                                                                  || (chip.Text == "OutOfStock" && (x.Stock_Local ?? 0) == 0 && (x.Stock_Incoming ?? 0) == 0 && (x.CarePack ?? 0) == 0)
                                                                   || (chip.Text == "ESD" && x.CarePack == 1))
                                                                   )).ToList();
 
         
-        newList = newList.Where(x => selectedChips.Any(chip => ((chip.Text == "ACC" && x.Warehouse == "ACC")
-                                                             || (chip.Text == "ALSO" && x.Warehouse == "ALSO")
-                                                             || (chip.Text == "F9" && x.Warehouse == "F9"))
-                                                             )).ToList();
+        //newList = newList.Where(x => selectedChips.Any(chip => ((chip.Text == "ACC" && x.Warehouse == "ACC")
+        //                                                     || (chip.Text == "ALSO" && x.Warehouse == "ALSO")
+        //                                                     || (chip.Text == "F9" && x.Warehouse == "F9"))
+        //                                                     )).ToList();
 
         //newList = newList.GroupBy(g => g.PartNumber)
         //                 .Select(s => s.OrderBy(x => x.Price_Local).First())
@@ -195,9 +199,7 @@ public partial class Notebooks
         foreach (var m in newList) {
             var matches = newList.Where(w => w.PartNumber == m.PartNumber);
             var incomingDate = matches.Min(x => x.Date_Incoming);
-            var incomingQty = matches.Where(x => x.Date_Incoming == incomingDate)
-                                     .Select(x => x.Stock_Incoming)
-                                     .FirstOrDefault();
+            var incomingQty = matches.Sum(x => x.Stock_Incoming);
 
             //var priceMin = matches.Any(x => x.Stock_Local > 0). Min(x => x.Price_Local);
 

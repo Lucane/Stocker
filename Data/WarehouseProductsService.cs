@@ -141,20 +141,14 @@ public class WarehouseProductsService
         //await _context.Database.ExecuteSqlRawAsync("delete from dbo.WarehouseProducts");
 
         API.ACC.ApiCaller caller_ACC = new API.ACC.ApiCaller(_context);
-        //API.ALSO.ApiCaller caller_ALSO = new API.ALSO.ApiCaller(_context);
+        API.ALSO.ApiCaller caller_ALSO = new API.ALSO.ApiCaller(_context);
+        API.F9.ApiCaller caller_F9 = new API.F9.ApiCaller(_context);
 
-        //API.F9.ApiCaller caller_F9 = new API.F9.ApiCaller(_context);
-        //var response = await caller_F9.RequestApi();
-        //System.Diagnostics.Debug.WriteLine(response);
-
-        await caller_ACC.GetProducts();
+        await caller_F9.GetProducts();
+        //await caller_ACC.GetProducts();
         //await caller_ALSO.GetProducts();
 
-        //if (response_ACC) await _context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.WarehouseProducts WHERE Warehouse = ACC");
-        //if (response_ALSO) await _context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.WarehouseProducts WHERE Warehouse = ALSO");
-
         return await Task.FromResult(true);
-        //return await caller.GetProducts();
     }
 
     public Task<WarehouseProducts> CreateProductAsync(WarehouseProducts objWarehouseConnection)

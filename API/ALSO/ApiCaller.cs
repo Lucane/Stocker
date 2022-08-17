@@ -48,14 +48,15 @@ public class ApiCaller
 
         var request = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF - 8""?><CatalogRequest>" +
                 @"<Route><From><ClientID>***REMOVED***</ClientID></From><To><ClientID>0</ClientID></To></Route>" +
-                @"<Filters><Filter FilterID=""VendorID"" Value=""80008028"" /><Filter FilterID=""StockLevel"" Value=""Transit"" />" +
+                @"<Filters><Filter FilterID=""VendorID"" Value=""80008028"" /><Filter FilterID=""StockLevel"" Value=""All"" />" +
                 @"<Filter FilterID=""Price"" Value=""WOVAT"" />" +
                 @"</Filters></CatalogRequest>");
 
         try {
-            query = Uri.EscapeUriString($@"https://b2b.also.ee/DirectXML.svc/0/scripts/XML_Interface.dll?USERNAME=***REMOVED***&PASSWORD=***REMOVED***&XML={request}");
+            query = $@"https://b2b.also.ee/DirectXML.svc/0/scripts/XML_Interface.dll?USERNAME=***REMOVED***&PASSWORD=***REMOVED***&XML={request}";
             var response = await client.GetAsync(query);
             System.Diagnostics.Debug.WriteLine($@"Response from ALSO API :: {response}");
+            System.Diagnostics.Debug.WriteLine(await response.Content.ReadAsStringAsync());
 
             if (response is not null && response.IsSuccessStatusCode) return await response.Content.ReadAsStringAsync();
 
@@ -79,7 +80,7 @@ public class ApiCaller
     {
         if (String.IsNullOrWhiteSpace(content)) return await Task.FromResult(false);
 
-        PriceCatalog responseObject = null;
+        PriceCatalog? responseObject = null;
 
         try {
             var serializer = new XmlSerializer(typeof(PriceCatalog));
@@ -87,7 +88,7 @@ public class ApiCaller
                 responseObject = (PriceCatalog)serializer.Deserialize(reader);
             }
         } catch (Exception ex) {
-            System.Diagnostics.Debug.WriteLine($@"ERROR while querying ALSO API :: {ex.Message} &-& {ex.InnerException}");
+            System.Diagnostics.Debug.WriteLine($@"ERROR while deserializing ALSO API response :: {ex.Message} &-& {ex.InnerException}");
         }
         //var responseObject = JsonConvert.DeserializeObject<Root>(content);
 
@@ -110,7 +111,7 @@ public class ApiCaller
             newProduct.LastUpdated = lastUpdated;
             newProduct.PartNumber = product.Product.PartNumber;
             newProduct.Price_Local = product.Price.UnitPrice.Value;
-            newProduct.Price_Remote = product.Qty.Where(x => x.WarehouseID == "FI" || x.WarehouseID == "LT").Min()?.UnitPrice;
+            newProduct.Price_Remote = product.Qty.Where(x => x.WarehouseID == "FI" || x.WarehouseID == "LT").Min(x => (decimal?)x.UnitPrice);
             //newProduct.Stock_Incoming = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "1").FirstOrDefault().QtyAvailable);
             newProduct.Stock_Local = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "1").FirstOrDefault()?.QtyAvailable);
             newProduct.Stock_Remote = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "2").FirstOrDefault()?.QtyAvailable);

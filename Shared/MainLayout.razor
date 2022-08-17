@@ -22,25 +22,61 @@
 
 @inherits LayoutComponentBase
 
+<style>
+    .mud-button {
+        padding: 6px 16px;
+        font-family: var(--mud-typography-button-family);
+        font-size: var(--mud-typography-button-size);
+        font-weight: var(--mud-typography-button-weight);
+        line-height: var(--mud-typography-button-lineheight);
+        letter-spacing: var(--mud-typography-button-letterspacing);
+        text-transform: var(--mud-typography-button-text-transform);
+        min-width: 64px;
+        box-sizing: border-box;
+        transition: background-color 250ms cubic-bezier(.4,0,.2,1) 0ms,box-shadow 250ms cubic-bezier(.4,0,.2,1) 0ms,border 250ms cubic-bezier(.4,0,.2,1) 0ms;
+        border-radius: var(--mud-default-borderradius);
+        color: #FFFDFB;
+        letter-spacing: .1em;
+    }
+
+    .app-title-text {
+        color: #BDC4C5;
+        text-shadow: rgba(0,0,0,.01) 0 0 1px;
+        font-weight: bold;
+        font-size: 1.5rem;
+        font-family: 'Modern Sans', Arial, sans-serif;
+        text-rendering: optimizeLegibility;
+        letter-spacing: .1em;
+        text-transform: none;
+        text-decoration: none;
+    }
+</style>
+
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+    <MudAppBar Elevation="0" Style="background-color: darkslategray">
+        <a Class="app-title-text" Href="">STOCKER</a>
+        <MudIconButton Style="visibility: hidden" />
+        @*<MudButton onselect="new Func" Variant="Variant.Text" Href="index" StartIcon="@Icons.Material.Filled.Home">Home</MudButton>*@
+        <MudButton Variant="Variant.Text" Href="notebooks" StartIcon="@Icons.Material.Filled.StoreMallDirectory">Hulgilaod</MudButton>
+        <MudButton Variant="Variant.Text" Href="parts" StartIcon="@Icons.Material.Filled.Hardware">Varuosad</MudButton>
+
+        @*<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />*@
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+    @*<MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
             <MudText Typo="Typo.h6">Stocker</MudText>
         </MudDrawerHeader>
         <NavMenu />
-    </MudDrawer>
+    </MudDrawer>*@
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-16 pt-16">
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-4 pt-4">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -48,6 +84,7 @@
 
 @code {
     bool _drawerOpen = true;
+
 
     void DrawerToggle()
     {
