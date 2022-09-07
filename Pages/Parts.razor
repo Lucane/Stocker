@@ -1,117 +1,416 @@
 ﻿@page "/parts"
 @using Stocker.Data
 @using StockerDB.Data.Stocker
-@using K4os.Compression.LZ4
+@using MudBlazor
+@using System.Text.RegularExpressions
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@*
-    Using OwningComponentBase ensures that the service and related services
-    that share its scope are disposed with the component.
-    Otherwise DbContext in ForecastService will live for the life of the
-    connection, which may be problematic if clients stay
-    connected for a long time.
-    We access WeatherForecastService using @Service
-*@
-@inherits OwningComponentBase<WarehouseConnectionsService>
-<h1>Hulgiladude API ühendused</h1>
+@inherits OwningComponentBase<PartsService>
+
+
+<PageTitle>Varuosad</PageTitle>
 <!-- AuthorizeView allows us to only show sections of the page -->
 <!-- based on the security on the current user -->
 <AuthorizeView>
     <!-- Show this section if the user is logged in -->
     <Authorized>
-        
+        @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData">Uuenda</MudButton>*@
+
+        <MudOverlay @bind-Visible="_showLoadingOverlay" LightBackground=false DarkBackground=false>
+            <MudProgressCircular Color="Color.Info" Indeterminate="true" />
+        </MudOverlay>
+
+        <MudOverlay @bind-Visible="showImageOverlay" LightBackground=true DarkBackground=false AutoClose=true>
+            <ChildContent>
+                <MudCarousel TData="string" ItemsSource="compatibleParts.FirstOrDefault(x => x.PartNumber == showImages).ImageURLs" Context="carousel" AutoCycle=false Style="height:95vh; width:90vw" >
+                    @*<BulletTemplate>
+                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
+                            <span class="mud-icon-button-label">
+                                @{
+                                    var dimCss = "opacity: 0.5";
+                                    if (true) dimCss = "";
+                                }
+                                <MudItem style="@dimCss">
+                                    <MudImage Src="@carousel" Style="max-height: 40px; max-height: 40px"  />
+                                </MudItem>
+                            </span>
+                        </div>
+                    </BulletTemplate>*@
+                    <ItemTemplate>
+                        <MudItem Class="d-flex justify-center mt-10 pt-5">
+                           <MudImage Elevation="5" Src="@carousel" Style="max-height: 85vh; max-width: 90vw" Class="mx-auto" ObjectFit="ObjectFit.Contain" ObjectPosition="ObjectPosition.Center"/>
+                        </MudItem>
+                        <MudItem Class="d-flex justify-center mt-n8">
+                            <MudText Class="px-2 py-1" Style="color: black; background-color: salmon">@(Regex.Match(carousel, @".*\/(.*)").Groups[1].Value)</MudText>
+                        </MudItem>
+                    </ItemTemplate>
+                </MudCarousel>
+            </ChildContent>
+        </MudOverlay>
+
+        <MudItem Class="d-flex mb-6 justify-content-center">
+            <MudAutocomplete Label="Arvuti mudel, Type või seerianumber" T="LenovoDevices" SearchFunc="SearchFunc" TextChanged="DeviceTextChanged" ValueChanged="DeviceSelectionChanged" OnKeyUp="SearchCustomInput"
+                            Class="mr-4" CoerceText=false CoerceValue=false ToStringFunc="@(e => e==null?null : $"{e.Name}")" ResetValueOnEmptyText=false Clearable=true Dense=true MaxHeight="500" AutoFocus=false />
+
+            <MudSelect T="string" Label="Kategooriad" MultiSelection=true @bind-SelectedValues="_selectedCategories"
+            Disabled="@(compatibleParts?.Count() == 0)" Dense=true Class="ml-4" MaxHeight="500" Clearable=true ValueChanged="FiltersChanged">
+                @if (compatibleParts is not null) {
+                    foreach (var category in compatibleParts.Select(x => x.Category).Distinct().OrderBy(x => x))
+                    {
+                        <MudSelectItem T="string" Value="@category">@category?.ToUpper()</MudSelectItem>
+                    }
+                }
+            </MudSelect>
+        </MudItem>
+
+        @if (_showTable) {
+            <MudTabs Elevation="5" Rounded="true" ApplyEffectsToContainer="true" Centered=true Border=true PanelClass="my-0 pt-0" KeepPanelsAlive=true @bind-ActivePanelIndex="_activePanelIndex">
+                <MudTabPanel Disabled="!partList.Any(x => x.IsModelPart)" Text="Tehasekonfiguratsioon" BadgeColor="Color.Primary">@*.Where(x => x.IsModelPart)*@
+                    <MudBlazor.MudTable Items="filteredList.Where(x => x.IsModelPart)" Virtualize=false Height="calc(100vh - 360px)" T="Product"
+                        Dense=true FixedHeader=true Context="tableContext" Hover=true Outlined=false Style="min-height: 100px" RowsPerPage="100"
+                        SortLabel="Sorteeri" Filter="new Func<Product,bool>(FilterFunc)" Loading="_tableLoading" LoadingProgressColor="Color.Info" >
+                            <ColGroup>
+                                <col />
+                                <col style="width: auto" />
+                                <col style="flex-wrap: nowrap" />
+                                <col style="flex-wrap: nowrap" />
+                            </ColGroup>
+                            <ToolBarContent>
+                                @*<MudText Typo="Typo.h6">Laoseis</MudText>*@
+                                    <MudTextField @bind-Value="searchString" Placeholder="Otsi varuosa" Adornment="Adornment.Start" Immediate=true
+                                                FullWidth=true AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium">
+                                    </MudTextField>
+                                    <MudIconButton Style="visibility: hidden" />
+                                    <MudChipSet MultiSelection="true" Style="display: flex; align-self: end" @bind-SelectedChips="_selectedChipsModel">
+                                        @*<MudChip Text="ACC" Default=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ACC</MudChip>
+                                        <MudChip Text="ALSO" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ALSO</MudChip>
+                                        <MudChip Text="F9" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:F9</MudChip>*@
+                                        <MudChip Text="InStock" Default="true" Variant="Variant.Text" Color="Color.Success" OnClick="FiltersChanged" Size="Size.Small">Laos</MudChip>
+                                        <MudChip Text="Incoming" Default="true" Variant="Variant.Text" Color="Color.Warning" OnClick="FiltersChanged" Size="Size.Small">Saabumas</MudChip>
+                                        <MudChip Text="OutOfStock" Default="true" Variant="Variant.Text" Color="Color.Error" OnClick="FiltersChanged" Size="Size.Small">Pole saadaval</MudChip>
+                                    </MudChipSet>
+                                    @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData" Style="align-self: flex-end; vertical-align: central">Uuenda</MudButton>*@
+                
+                            </ToolBarContent>
+
+                            <HeaderContent>
+                                @*<MudBlazor.MudTh>Part Number</MudBlazor.MudTh>
+                                <MudBlazor.MudTh>Description</MudBlazor.MudTh>
+                                <MudBlazor.MudTh>Stock EE</MudBlazor.MudTh>
+                                <MudBlazor.MudTh>Price EE</MudBlazor.MudTh>*@
+                                @*Style="background-color: #78A289*@
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 200px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, object>(x=>x.PartNumber)">Varuosakood</MudTableSortLabel></MudTh>
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; width: 150px" />
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 100px"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.PriceMin)">Hind</MudTableSortLabel></MudTh>
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudBlazor.MudTd DataLabel="Varuosakood">
+                                    <MudText>
+                                        <MudHighlighter Text="@tableContext.PartNumber" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                                    </MudText>
+                                    @*<MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" @onclick="CopyTextToClipboard"/>*@
+                                </MudBlazor.MudTd>
+
+                                <MudBlazor.MudTd DataLabel="Kirjeldus">
+                                    <MudText>
+                                        <MudHighlighter Text="@tableContext.Description" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                                    </MudText>
+                                    <MudText Color="Color.Default" Typo="Typo.subtitle2" Class="ml-3">
+                                        <MudHighlighter Text="@tableContext.Category.ToUpper()" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                                    </MudText>
+                                </MudBlazor.MudTd>
+
+                                <MudBlazor.MudTd DataLabel="Laoseis" Style="vertical-align: central; text-align: center; font-weight: 500">
+                                    @{var cont = tableContext.PartNumber; }
+
+                                    <MudIcon Class="cursor-pointer mr-3" Icon="@Icons.Material.TwoTone.OpenInNew" Color="Color.Info" @onclick="() => NavigateToNewTab(cont)" />
+
+                                    @if (tableContext.ImageURLs?.Count() > 0) {
+                                        <MudBadge Content="tableContext.ImageURLs.Count()" Overlap=true Origin="Origin.TopRight" Color="Color.Info" Class="mr-3">
+                                            <MudIcon Icon="@Icons.Material.Outlined.PhotoLibrary" Color="Color.Info" @onclick="() => PopulateImageOverlay(cont)" Class="cursor-pointer" />
+                                            @*<MudIconButton Icon="@Icons.Material.TwoTone.Image" Color="Color.Info" Size="Size.Small" @onclick="PopulateOverlay"/>*@
+                                        </MudBadge>
+                                    
+                                    } else {
+                                        <MudIcon Icon="@Icons.Material.Outlined.Image" Color="Color.Dark" Class="mr-3" />
+                                    }
+
+                                    @if (tableContext.TotalStock > 0) {
+                                            @*<MudTooltip Text="Laos" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                                                <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
+                                            </MudTooltip>*@
+
+                                            <MudTooltip Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                                                <ChildContent>
+                                                    <MudIcon Class="cursor-pointer" @onclick="() => ShowRowDetails(tableContext.PartNumber)"
+                                                        Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
+                                                </ChildContent>
+                                                <TooltipContent>
+                                                    <MudText Typo="Typo.inherit">
+                                                        Laos @(tableContext.TotalStock)tk
+                                                    </MudText>
+                                                </TooltipContent>
+                                            </MudTooltip>
+                        
+                                    } else if ((tableContext.TotalStock ?? 0) == 0 && tableContext.IncomingStockEarliest.HasValue && tableContext.IncomingStockEarliest != DateTime.MinValue) {
+                                        <MudTooltip Placement="Placement.Start" Delay="50" Color="Color.Dark">
+                                            <ChildContent>
+                                                <MudIcon Class="cursor-pointer" @onclick="() => ShowRowDetails(tableContext.PartNumber)"
+                                                    Icon="@Icons.Material.TwoTone.ShoppingCartCheckout" Color="Color.Warning" />
+                                            </ChildContent>
+                                            <TooltipContent>
+                                                <MudText Typo="Typo.inherit">
+                                                    @tableContext.IncomingStockEarliest.Value.ToString("yyyy-MM-dd")
+                                                </MudText>
+                                            </TooltipContent>
+                                        </MudTooltip>
+                                    } else if (tableContext.TotalStock == 0 && tableContext.PriceMin > 0) {
+                                        <MudTooltip Text="Laost otsas" Placement="Placement.Left" Delay="50" Color="Color.Dark" >
+                                            <MudIcon Icon="@Icons.Material.TwoTone.RemoveShoppingCart" Color="Color.Error" />
+                                        </MudTooltip>
+                                    } else if (!tableContext.PriceMin.HasValue || tableContext.PriceMin == 0) {
+                                        <MudTooltip Text="Pole tellitav" Placement="Placement.Left" Delay="50" Color="Color.Dark" >
+                                            <MudIcon Icon="@Icons.Material.Outlined.ShoppingCart" Color="Color.Dark" />
+                                        </MudTooltip>
+                                    }
+
+                                </MudBlazor.MudTd>
+                            @if (tableContext.PriceMin.HasValue && tableContext.PriceMin > 0) {
+                                <MudBlazor.MudTd DataLabel="Hind" Style="text-align: right; white-space: nowrap; font-weight: 500">@tableContext.PriceMin €</MudBlazor.MudTd>
+                            } else {
+                                <MudBlazor.MudTd DataLabel="Hind" Style="text-align: right; white-space: nowrap; font-weight: 500">
+                                    <MudText>—</MudText>
+                                </MudBlazor.MudTd>
+                            }
+                            
+                            </RowTemplate>
+                            <ChildRowContent>
+		                        @if (tableContext.PartNumber == showDetails && tableContext.PriceMin > 0)
+				                    {
+                                    <MudTr>
+                                        <td colspan="4">
+	                                        <MudCard Square=true Outlined=true Style="background-color: #78A289">
+	                                            <MudCardContent>
+	                                                <MudTable Items="stockStatus?.Where(x => x.PartNumber == tableContext.PartNumber)" Context="childContext" Hover="true" Elevation="0" Style="z-index: 0">
+	                                                    <HeaderContent>
+                                                            <MudTh />
+                                                            <MudTh>Ladu</MudTh>
+		                                                    <MudTh>Saadaval</MudTh>
+		                                                    <MudTh>Saabuv kogus</MudTh>
+		                                                    <MudTh>Hind</MudTh>
+	                                                    </HeaderContent>
+	                                                    <RowTemplate>
+                                                            <MudTd />
+		                                                    <MudTd DataLabel="Ladu">@childContext.Warehouse</MudTd>
+		                                                    <MudTd DataLabel="Saadaval">
+                                                                @if (childContext.StockAvailable > 0) {
+                                                                    <MudText>@childContext.StockAvailable</MudText>
+                                                                } else {
+                                                                    <MudText>—</MudText>
+                                                                }
+                                                            </MudTd>
+		                                                    <MudTd DataLabel="Saabuv kogus">
+										                        @if ((childContext.StockAvailable ?? 0) == 0 && childContext.DateIncoming != DateTime.MinValue) {
+                                                                    <MudText>@childContext.DateIncoming.Value.ToString("yyyy-MM-dd")</MudText>
+                                                                }
+										                        else {
+                                                                    <MudText>—</MudText>
+                                                                }
+                                                            </MudTd>
+                                                            <MudTd DataLabel="Hind">@childContext.PriceDiscounted €</MudTd>
+	                                                    </RowTemplate>
+	                                                </MudTable>
+	                                            </MudCardContent>
+	                                        </MudCard>
+                                        </td>
+                                    </MudTr>
+		                            }
+	                        </ChildRowContent>
+                            <PagerContent>
+                                <MudTablePager PageSizeOptions="new int[]{50, 100}"  HideRowsPerPage=true InfoFormat="{first_item}-{last_item} (kokku {all_items})"/>
+                            </PagerContent>
+                        </MudBlazor.MudTable>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Ühilduvad varuosad" BadgeColor="Color.Primary">
+                    <MudBlazor.MudTable Items="filteredList" Virtualize=false Height="calc(100vh - 360px)" T="Product"
+                        Dense=true FixedHeader=true Context="tableContext" Hover=true Outlined=false Style="min-height: 100px" RowsPerPage="100"
+                        SortLabel="Sorteeri" Filter="new Func<Product,bool>(FilterFunc)" Loading="_tableLoading" LoadingProgressColor="Color.Info" >
+                            <ColGroup>
+                                <col />
+                                <col style="width: auto" />
+                                <col style="flex-wrap: nowrap" />
+                                <col style="flex-wrap: nowrap" />
+                            </ColGroup>
+                            <ToolBarContent>
+                                @*<MudText Typo="Typo.h6">Laoseis</MudText>*@
+                                    <MudTextField @bind-Value="searchString" Placeholder="Otsi varuosa" Adornment="Adornment.Start" Immediate=true
+                                                FullWidth=true AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium">
+                                    </MudTextField>
+                                    <MudIconButton Style="visibility: hidden" />
+                                    <MudChipSet MultiSelection="true" Style="display: flex; align-self: end" @bind-SelectedChips="_selectedChips" >
+                                        @*<MudChip Text="ACC" Default=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ACC</MudChip>
+                                        <MudChip Text="ALSO" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ALSO</MudChip>
+                                        <MudChip Text="F9" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:F9</MudChip>*@
+                                        <MudChip Text="InStock" Default="true" Variant="Variant.Text" Color="Color.Success" OnClick="FiltersChanged" Size="Size.Small">Laos</MudChip>
+                                        <MudChip Text="Incoming" Default="true" Variant="Variant.Text" Color="Color.Warning" OnClick="FiltersChanged" Size="Size.Small">Saabumas</MudChip>
+                                        <MudChip Text="OutOfStock" Default="true" Variant="Variant.Text" Color="Color.Error" OnClick="FiltersChanged" Size="Size.Small">Pole saadaval</MudChip>
+                                    </MudChipSet>
+                                    @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData" Style="align-self: flex-end; vertical-align: central">Uuenda</MudButton>*@
+                
+                            </ToolBarContent>
+
+                            <HeaderContent>
+                                @*<MudBlazor.MudTh>Part Number</MudBlazor.MudTh>
+                                <MudBlazor.MudTh>Description</MudBlazor.MudTh>
+                                <MudBlazor.MudTh>Stock EE</MudBlazor.MudTh>
+                                <MudBlazor.MudTh>Price EE</MudBlazor.MudTh>*@
+                                @*Style="background-color: #78A289*@
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 200px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, object>(x=>x.PartNumber)">Varuosakood</MudTableSortLabel></MudTh>
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; width: 150px" />
+                                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 100px"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.PriceMin)">Hind</MudTableSortLabel></MudTh>
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudBlazor.MudTd DataLabel="Varuosakood">
+                                    <MudText>
+                                        <MudHighlighter Text="@tableContext.PartNumber" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                                    </MudText>
+                                    @*<MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" @onclick="CopyTextToClipboard"/>*@
+                                </MudBlazor.MudTd>
+
+                                <MudBlazor.MudTd DataLabel="Kirjeldus">
+                                    <MudText>
+                                        <MudHighlighter Text="@tableContext.Description" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                                    </MudText>
+                                    <MudText Color="Color.Default" Typo="Typo.subtitle2" Class="ml-3">
+                                        <MudHighlighter Text="@tableContext.Category.ToUpper()" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                                    </MudText>
+                                </MudBlazor.MudTd>
+
+                                <MudBlazor.MudTd DataLabel="Laoseis" Style="vertical-align: central; text-align: center; font-weight: 500">
+                                    @{var cont = tableContext.PartNumber; }
+
+                                    <MudIcon Class="cursor-pointer mr-3" Icon="@Icons.Material.TwoTone.OpenInNew" Color="Color.Info" @onclick="() => NavigateToNewTab(cont)" />
+
+                                    @if (tableContext.ImageURLs?.Count() > 0) {
+                                        <MudBadge Content="tableContext.ImageURLs.Count()" Overlap=true Origin="Origin.TopRight" Color="Color.Info" Class="mr-3">
+                                            <MudIcon Icon="@Icons.Material.Outlined.PhotoLibrary" Color="Color.Info" @onclick="() => PopulateImageOverlay(cont)" Class="cursor-pointer" />
+                                            @*<MudIconButton Icon="@Icons.Material.TwoTone.Image" Color="Color.Info" Size="Size.Small" @onclick="PopulateOverlay"/>*@
+                                        </MudBadge>
+                                    
+                                    } else {
+                                        <MudIcon Icon="@Icons.Material.Outlined.Image" Color="Color.Dark" Class="mr-3" />
+                                    }
+
+                                    @if (tableContext.TotalStock > 0) {
+                                            @*<MudTooltip Text="Laos" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                                                <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
+                                            </MudTooltip>*@
+
+                                            <MudTooltip Placement="Placement.Left" Delay="50" Color="Color.Dark">
+                                                <ChildContent>
+                                                    <MudIcon Class="cursor-pointer" @onclick="() => ShowRowDetails(tableContext.PartNumber)"
+                                                        Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
+                                                </ChildContent>
+                                                <TooltipContent>
+                                                    <MudText Typo="Typo.inherit">
+                                                        Laos @(tableContext.TotalStock)tk
+                                                    </MudText>
+                                                </TooltipContent>
+                                            </MudTooltip>
+                        
+                                    } else if ((tableContext.TotalStock ?? 0) == 0 && tableContext.IncomingStockEarliest.HasValue && tableContext.IncomingStockEarliest != DateTime.MinValue) {
+                                        <MudTooltip Placement="Placement.Start" Delay="50" Color="Color.Dark">
+                                            <ChildContent>
+                                                <MudIcon Class="cursor-pointer" @onclick="() => ShowRowDetails(tableContext.PartNumber)"
+                                                    Icon="@Icons.Material.TwoTone.ShoppingCartCheckout" Color="Color.Warning" />
+                                            </ChildContent>
+                                            <TooltipContent>
+                                                <MudText Typo="Typo.inherit">
+                                                    @tableContext.IncomingStockEarliest.Value.ToString("yyyy-MM-dd")
+                                                </MudText>
+                                            </TooltipContent>
+                                        </MudTooltip>
+                                    } else if (tableContext.TotalStock == 0 && tableContext.PriceMin > 0) {
+                                        <MudTooltip Text="Laost otsas" Placement="Placement.Left" Delay="50" Color="Color.Dark" >
+                                            <MudIcon Icon="@Icons.Material.TwoTone.RemoveShoppingCart" Color="Color.Error" />
+                                        </MudTooltip>
+                                    } else if (!tableContext.PriceMin.HasValue || tableContext.PriceMin == 0) {
+                                        <MudTooltip Text="Pole tellitav" Placement="Placement.Left" Delay="50" Color="Color.Dark" >
+                                            <MudIcon Icon="@Icons.Material.Outlined.ShoppingCart" Color="Color.Dark" />
+                                        </MudTooltip>
+                                    }
+
+                                </MudBlazor.MudTd>
+                            @if (tableContext.PriceMin.HasValue && tableContext.PriceMin > 0) {
+                                <MudBlazor.MudTd DataLabel="Hind" Style="text-align: right; white-space: nowrap; font-weight: 500">@tableContext.PriceMin €</MudBlazor.MudTd>
+                            } else {
+                                <MudBlazor.MudTd DataLabel="Hind" Style="text-align: right; white-space: nowrap; font-weight: 500">
+                                    <MudText>—</MudText>
+                                </MudBlazor.MudTd>
+                            }
+                            
+                            </RowTemplate>
+                            <ChildRowContent>
+		                        @if (tableContext.PartNumber == showDetails && tableContext.PriceMin > 0)
+				                    {
+                                    <MudTr>
+                                        <td colspan="4">
+	                                        <MudCard Square=true Outlined=true Style="background-color: #78A289">
+	                                            <MudCardContent>
+	                                                <MudTable Items="stockStatus?.Where(x => x.PartNumber == tableContext.PartNumber)" Context="childContext" Hover="true" Elevation="0" Style="z-index: 0">
+	                                                    <HeaderContent>
+                                                            <MudTh />
+                                                            <MudTh>Ladu</MudTh>
+		                                                    <MudTh>Saadaval</MudTh>
+		                                                    <MudTh>Saabuv kogus</MudTh>
+		                                                    <MudTh>Hind</MudTh>
+	                                                    </HeaderContent>
+	                                                    <RowTemplate>
+                                                            <MudTd />
+		                                                    <MudTd DataLabel="Ladu">@childContext.Warehouse</MudTd>
+		                                                    <MudTd DataLabel="Saadaval">
+                                                                @if (childContext.StockAvailable > 0) {
+                                                                    <MudText>@childContext.StockAvailable</MudText>
+                                                                } else {
+                                                                    <MudText>—</MudText>
+                                                                }
+                                                            </MudTd>
+		                                                    <MudTd DataLabel="Saabuv kogus">
+										                        @if ((childContext.StockAvailable ?? 0) == 0 && childContext.DateIncoming != DateTime.MinValue) {
+                                                                    <MudText>@childContext.DateIncoming.Value.ToString("yyyy-MM-dd")</MudText>
+                                                                }
+										                        else {
+                                                                    <MudText>—</MudText>
+                                                                }
+                                                            </MudTd>
+                                                            <MudTd DataLabel="Hind">@childContext.PriceDiscounted €</MudTd>
+	                                                    </RowTemplate>
+	                                                </MudTable>
+	                                            </MudCardContent>
+	                                        </MudCard>
+                                        </td>
+                                    </MudTr>
+		                            }
+	                        </ChildRowContent>
+                            <PagerContent>
+                                <MudTablePager PageSizeOptions="new int[]{50, 100}"  HideRowsPerPage=true InfoFormat="{first_item}-{last_item} (kokku {all_items})"/>
+                            </PagerContent>
+                        </MudBlazor.MudTable>
+                </MudTabPanel>
+            </MudTabs>
+        }
     </Authorized>
-    <!-- Show this section if the user is not logged in -->
-    <NotAuthorized>
-        <p>Selle lehe nägemiseks pead olema sisse logitud!</p>
-    </NotAuthorized>
+
+    @*<NotAuthorized>
+        @{ NavManager.NavigateTo($"Identity/Account/Login"); }
+        @{
+            var returnUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
+            <_RedirectToLogin ReturnUrl="@returnUrl"/>
+        }
+    </NotAuthorized>*@
 </AuthorizeView>
-
-@code 
-{
-    // AuthenticationState is available as a CascadingParameter
-    [CascadingParameter]
-    private Task<AuthenticationState>? authenticationStateTask { get; set; }
-    List<WarehouseConnections> warehouses = new List<WarehouseConnections>();
-
-    // no need to limit access to this page as of now
-    //private string UserIdentityName = "";
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Get the current user
-        if (authenticationStateTask != null)
-        {
-            var user = (await authenticationStateTask).User;
-            if (user.Identity != null)
-            {
-                //UserIdentityName = user.Identity.Name ?? "";
-                warehouses = await @Service.GetWarehousesAsync();
-            }
-        }
-
-    }
-
-    WarehouseConnections objWarehouse = new WarehouseConnections();
-    bool ShowPopup = false;
-    bool ShowRemovalPopup = false;
-
-    void ClosePopup()
-    {
-        // Close the Popup
-        ShowPopup = false;
-        ShowRemovalPopup = false;
-    }
-
-    void AddWarehouse()
-    {
-        objWarehouse = new WarehouseConnections();
-        objWarehouse.Id = 0;
-        ShowPopup = true;
-    }
-
-    async Task SaveWarehouse()
-    {
-        // Close the Popup
-        ShowPopup = false;
-        // A new forecast will have the Id set to 0
-        if (objWarehouse.Id == 0)
-        {
-            // Create new forecast
-            var objNewWarehouse = new WarehouseConnections();
-            objNewWarehouse.DisplayName = objWarehouse.DisplayName;
-            objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
-            objNewWarehouse.LoginName = objWarehouse.LoginName;
-            objNewWarehouse.LoginSecret = objWarehouse.LoginSecret;
-            objNewWarehouse.LastUpdated = System.DateTime.Now;
-
-            // Save the result
-            var result = @Service.CreateWarehouseAsync(objNewWarehouse);
-        }
-        else
-        {
-            var result = @Service.UpdateWarehouseAsync(objWarehouse);
-        }
-
-        // Get the forecasts for the current user
-        warehouses = await @Service.GetWarehousesAsync();
-    }
-
-    void EditWarehouse(WarehouseConnections warehouse)
-    {
-        objWarehouse = warehouse;
-        ShowPopup = true;
-    }
-
-    void ConfirmRemoval(WarehouseConnections warehouse)
-    {
-        objWarehouse = warehouse;
-        ShowRemovalPopup = true;
-    }
-
-    async Task DeleteWarehouse()
-    {
-        var result = @Service.DeleteWarehouseAsync(objWarehouse);
-        warehouses = await @Service.GetWarehousesAsync();
-        ShowRemovalPopup = false;
-    }
-}

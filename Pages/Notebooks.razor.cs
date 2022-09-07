@@ -251,7 +251,6 @@ public partial class Notebooks
         //}
         //if (inStock) products = products.Where(x => x.Stock_EE > 0).ToList();
 
-        await Task.Delay(50);
         _loading = false;
     }
 

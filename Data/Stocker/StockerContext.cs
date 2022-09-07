@@ -18,6 +18,7 @@ namespace StockerDB.Data.Stocker
         {
         }
 
+        public virtual DbSet<LenovoDevices> LenovoDevices { get; set; }
         public virtual DbSet<PartsList> PartsList { get; set; }
         public virtual DbSet<PartsStock> PartsStock { get; set; }
         public virtual DbSet<WarehouseConnections> WarehouseConnections { get; set; }
@@ -27,6 +28,27 @@ namespace StockerDB.Data.Stocker
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<LenovoDevices>(entity =>
+            {
+                entity.Property(e => e.FullGUID).HasMaxLength(1000);
+
+                entity.Property(e => e.ImageURL).HasMaxLength(1000);
+
+                entity.Property(e => e.LastUpdated).HasColumnType("datetime");
+
+                entity.Property(e => e.Name).HasMaxLength(1000);
+
+                entity.Property(e => e.ParentGUID).HasMaxLength(100);
+
+                entity.Property(e => e.ProductGUID).HasMaxLength(100);
+
+                entity.Property(e => e.ProductID)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.ProductURL).HasMaxLength(1000);
+            });
+
             modelBuilder.Entity<PartsList>(entity =>
             {
                 entity.Property(e => e.LastUpdated).HasColumnType("datetime");

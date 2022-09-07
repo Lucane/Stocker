@@ -1,0 +1,60 @@
+﻿@baseAddress = https://supportapi.lenovo.com/v2.5
+@userAgent = Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
+
+
+### Retrieves the product details specified by "ID". In this case "ID" equals machine type.
+POST {{baseAddress}}/Product?ID=20UD HTTP/1.1
+Content-Type: application/json
+ClientID: ***REMOVED***
+
+### Retrieves the product details specified by "ID". In this case "ID" equals machine model.
+POST {{baseAddress}}/Product?ID=20ud002hmx HTTP/1.1
+Content-Type: application/json
+ClientID: ***REMOVED***
+
+### Retrieves the product details specified by "ID". In this case "ID" equals machine serial number.
+POST {{baseAddress}}/Product?ID=pf33j2r1 HTTP/1.1
+Content-Type: application/json
+ClientID: ***REMOVED***
+
+
+### Retrieves a list of spare parts for the specified device. Either ?Serial or ?Product must be provided.
+POST {{baseAddress}}/Part?Serial=PF33J2R1 HTTP/1.1
+Content-Type: application/json
+ClientID: ***REMOVED***
+
+
+### Retrieves a list of details for the specified part numbers (i.e. "ID").
+POST {{baseAddress}}/Part?ID=00UP735 HTTP/1.1
+Content-Type: application/json
+ClientID: ***REMOVED***
+
+
+### Retrieves the full product catalog.
+GET {{baseAddress}}/Catalog HTTP/1.1
+Content-Type: application/json
+ClientID: ***REMOVED***
+
+
+### /model serves the same purpose as /as-built, but provides more accurate data. Requires (model) and (type) values to be provided.
+### https://pcsupport.lenovo.com/us/en/products/laptops-and-netbooks/thinkpad-t-series-laptops/thinkpad-t14-type-20ud-20ue/20ud/20ud002hmx/pf33j2r1/parts/display/model
+POST {{baseAddress}}/model HTTP/1.1
+Content-Type: application/json
+
+{
+    "serialId": "",
+    "model": "20UD002HMX",
+    "mtId": "20UD"
+}
+
+
+### /compatible retrieves a list of compatible parts based on the device family. Requires that only the (type) value be provided.
+### https://pcsupport.lenovo.com/us/en/products/laptops-and-netbooks/thinkpad-t-series-laptops/thinkpad-t14-type-20ud-20ue/20ud/20ud002hmx/pf33j2r1/parts/display/compatible
+POST {{baseAddress}}/compatible HTTP/1.1
+Content-Type: application/json
+
+{
+    "serialId": "",
+    "model": "",
+    "mtId": "20UD"
+}

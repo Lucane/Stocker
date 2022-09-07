@@ -1,0 +1,55 @@
+﻿@baseAddress = https://pcsupport.lenovo.com/ee/en/api/v4/upsellAggregation/parts
+@userAgent = Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
+
+
+
+###
+### Using the /us/en/ regional endpoint returns "method not allowed".
+### This is likely because the /us site is located overseas and hosted on a different server with a different security implementation.
+### This "issue" appears to be almost exclusively with the /us site. Most European sites work.
+### Here are some examples that seem to have more relaxed referrer policies: /ee/en/ - /it/en/ - /no/en/ - /pl/en/
+###
+### In this project, the /asBuilt endpoint is ignored: only /model and /compatible are used.
+### It is better to use the /model endpoint, since /asBuilt oftentimes returns data that is incomplete.
+###
+### The only benefit of using /asBuilt, is that you can potentially find out what specific FRUs were installed in the machine.
+### Although this has very limited usefulness, apart from a few specific scenarios (what are the technical parameters of the actual LCD installed, what speed/gen is the SSD etc).
+###
+
+
+
+### /asBuilt retrieves a list of parts based on the original factory configuration.
+### /asBuilt requires that at minimum (serial number) and (type) values are provided. The (model) value can be omitted.
+### https://pcsupport.lenovo.com/us/en/products/laptops-and-netbooks/thinkpad-t-series-laptops/thinkpad-t14-type-20ud-20ue/20ud/20ud002hmx/pf33j2r1/parts/display/as-built
+POST {{baseAddress}}/asBuilt HTTP/1.1
+Content-Type: application/json
+
+{
+    "serialId": "PF33J2R1",
+    "model": "",
+    "mtId": "20UD"
+}
+
+
+### /model serves the same purpose as /as-built, but provides more accurate data. Requires (model) and (type) values to be provided.
+### https://pcsupport.lenovo.com/us/en/products/laptops-and-netbooks/thinkpad-t-series-laptops/thinkpad-t14-type-20ud-20ue/20ud/20ud002hmx/pf33j2r1/parts/display/model
+POST {{baseAddress}}/model HTTP/1.1
+Content-Type: application/json
+
+{
+    "serialId": "",
+    "model": "20UD002HMX",
+    "mtId": "20UD"
+}
+
+
+### /compatible retrieves a list of compatible parts based on the device family. Requires that only the (type) value be provided.
+### https://pcsupport.lenovo.com/us/en/products/laptops-and-netbooks/thinkpad-t-series-laptops/thinkpad-t14-type-20ud-20ue/20ud/20ud002hmx/pf33j2r1/parts/display/compatible
+POST {{baseAddress}}/compatible HTTP/1.1
+Content-Type: application/json
+
+{
+    "serialId": "",
+    "model": "",
+    "mtId": "20UD"
+}

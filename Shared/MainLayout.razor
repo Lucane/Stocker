@@ -19,7 +19,7 @@
     </main>
 </div>
 *@
-
+@using MudBlazor
 @inherits LayoutComponentBase
 
 <style>
@@ -57,12 +57,17 @@
 <MudSnackbarProvider />
 
 <MudLayout>
+    @{string underConstruction = "TULEMAS";}
+
     <MudAppBar Elevation="0" Style="background-color: darkslategray">
         <a Class="app-title-text" Href="">STOCKER</a>
         <MudIconButton Style="visibility: hidden" />
         @*<MudButton onselect="new Func" Variant="Variant.Text" Href="index" StartIcon="@Icons.Material.Filled.Home">Home</MudButton>*@
-        <MudButton Variant="Variant.Text" Href="notebooks" StartIcon="@Icons.Material.Filled.StoreMallDirectory">Hulgilaod</MudButton>
+        <MudButton Variant="Variant.Text" Href="notebooks" StartIcon="@Icons.Material.Filled.Warehouse">Hulgilaod</MudButton>
         <MudButton Variant="Variant.Text" Href="parts" StartIcon="@Icons.Material.Filled.Hardware">Varuosad</MudButton>
+        <MudBadge Icon="@Icons.Material.Outlined.AccessTime" Overlap=true Origin="Origin.TopRight" Color="Color.Warning">
+            <MudButton Variant="Variant.Text" Href="service" StartIcon="@Icons.Material.Filled.SupportAgent" Disabled=true>Hooldustööd</MudButton>
+        </MudBadge>
 
         @*<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />

@@ -1,0 +1,22 @@
+﻿@page "/service"
+@using Stocker.Data
+@using StockerDB.Data.Stocker
+@using MudBlazor
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inherits OwningComponentBase<PartsService>
+
+
+<PageTitle>Hooldustööd</PageTitle>
+<!-- AuthorizeView allows us to only show sections of the page -->
+<!-- based on the security on the current user -->
+<AuthorizeView>
+    <!-- Show this section if the user is logged in -->
+    <Authorized>
+
+    </Authorized>
+    <!-- Show this section if the user is not logged in -->
+    <NotAuthorized>
+        <p>Selle lehe nägemiseks pead olema sisse logitud!</p>
+    </NotAuthorized>
+</AuthorizeView>
