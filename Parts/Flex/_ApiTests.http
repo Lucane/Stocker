@@ -2,7 +2,7 @@
 POST https://www.lenovopartsales.com/LenovoEsales/apexremote HTTP/1.1
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
 Content-Type: application/json
-Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__Products?cartID=&portalUser=&store=&cclcl=en_US&operation=quickSearch&searchText=t14
+Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__HomePage
 
 {
     "action": "cc_lenovo_ctrl_ProductListShowProduct",
@@ -11,7 +11,8 @@ Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__Products?cartID=&por
     "type": "rpc",
     "tid": 13,
     "ctx": {
-        "csrf": "VmpFPSxNakF5TWkwd09DMHlNVlF5TURveU56bzBNeTQwTXpkYSw5NVNJWDZTTEpKemxYWTA1UWxoLW5iLE1HTXpNVE15",
+        "authorization": "eyJub25jZSI6ImxsUG4wRUtwWDktU1Fhdy0xN0o0QzZPd1lVNU9XcTBLS1ZzYko1ckhxaklcdTAwM2QiLCJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IntcInRcIjpcIjAwRDMwMDAwMDAxRlpOUlwiLFwidlwiOlwiMDJHMU8wMDAwMDBvZEFXXCIsXCJhXCI6XCJ2ZnJlbW90aW5nc2lnbmluZ2tleVwiLFwidVwiOlwiMDA1MU8wMDAwMENvMm5tXCJ9IiwiY3JpdCI6WyJpYXQiXSwiaWF0IjoxNjk2NzkyOTYzOTc1LCJleHAiOjB9.Q2p0alkxOXNaVzV2ZG05ZlkzUnliRjlRY205a2RXTjBUR2x6ZEZOb2IzZFFjbTlrZFdOMExrbHVkbVZ1ZEc5eWVVSjVYMWRoY21Wb2IzVnpaUT09.wIzhCNAnru2QLhW1wApHLIYQ8uNZysILjbW6n2dNWnk=",
+        "csrf": "VmpFPSxNakF5TXkweE1DMHhNVlF4T1RveU1qbzBNeTQ1TnpSYSxydEd6clRrUXlMRW5UbkNjQ081aWJwUGdTd3UzVHZ0SUsyQ1A0c1lmMjljPSxNR016TVRNeQ==",
         "vid": "066a0000000CqD0",
         "ns": "",
         "ver": 41
@@ -23,7 +24,7 @@ Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__Products?cartID=&por
 POST https://www.lenovopartsales.com/LenovoEsales/apexremote HTTP/1.1
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
 Content-Type: application/json
-Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__Products?cartID=&portalUser=&store=&cclcl=en_US&operation=quickSearch&searchText=t14
+Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__HomePage
 
 {
     "action": "ccrz.cc_ctrl_ProductListRD",
@@ -41,9 +42,17 @@ Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__Products?cartID=&por
     "type": "rpc",
     "tid": 10,
     "ctx": {
-        "csrf": "VmpFPSxNakF5TWkwd09DMHlNVlF5TURveU56bzBNeTQwTkRKYSxQSWtZa19nbGVqTGlNdHBoVGh6aTRnLE5HRTJNamcz",
+        "authorization": "eyJub25jZSI6Im8xM3FQeldRUGJjbkl1QWdxeE1vYjFRemlIcFVFZzkwbldFbVpCcEg2NHdcdTAwM2QiLCJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6IntcInRcIjpcIjAwRDMwMDAwMDAxRlpOUlwiLFwidlwiOlwiMDJHMU8wMDAwMDBvZEFXXCIsXCJhXCI6XCJ2ZnJlbW90aW5nc2lnbmluZ2tleVwiLFwidVwiOlwiMDA1MU8wMDAwMENvMm5tXCJ9IiwiY3JpdCI6WyJpYXQiXSwiaWF0IjoxNjk2NzkyOTY0MDAxLCJleHAiOjB9.Q2lSalkzSjZMbU5qWDJOMGNteGZVSEp2WkhWamRFeHBjM1JTUkM1bVpYUmphRkJoWjJVPQ==.c6c-OdyU9icxTIEJHBJd6bcp4CUGvGktFVNQFsU-shc=",
+        "csrf": "VmpFPSxNakF5TXkweE1DMHhNVlF4T1RveU1qbzBOQzR3TURCYSxmYk8weHRPYUxKUkxRUWFCN21zT0NWdjNFcGpUajliVmxvc3kyWTRzaE5zPSxOR0UyTWpnMw==",
         "vid": "066a0000000CqD0",
         "ns": "ccrz",
         "ver": 50
     }
 }
+
+
+### GET request that fetches the CSRF and auth tokens to be used in POST requests.
+GET https://www.lenovopartsales.com/LenovoEsales/ccrz__Products
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
+Content-Type: application/json
+Referer: https://www.lenovopartsales.com/LenovoEsales/ccrz__HomePage
