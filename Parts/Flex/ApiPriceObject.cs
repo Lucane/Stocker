@@ -19,8 +19,8 @@ public class ApiPriceObject
 public class Datum
 {
     public decimal price { get; set; }
-    public int basePrice { get; set; }
-    public int savings { get; set; }
+    public decimal basePrice { get; set; }
+    public decimal savings { get; set; }
     public bool showNewSubscriptionSelection { get; set; }
     public double avgRating { get; set; }
     public ProdBean prodBean { get; set; }
