@@ -33,6 +33,8 @@ builder.Services.AddScoped<PartsService>();
 builder.Services.AddDbContext<StockerDB.Data.Stocker.StockerContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Configuration.AddUserSecrets<Program>(true);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

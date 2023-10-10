@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Stocker.Data;
 using StockerDB.Data.Stocker;
 //using Newtonsoft.Json;
+using Microsoft.AspNetCore.Components;
 
 namespace Stocker.API.ACC;
 public class ApiCaller
@@ -23,6 +24,9 @@ public class ApiCaller
     {
         _context = context;
     }
+
+    [Inject]
+    private IConfiguration _config { get; set; }
 
     public async Task<bool> GetProducts()
     {
@@ -45,9 +49,11 @@ public class ApiCaller
         client.BaseAddress = new Uri("https://api.accdistribution.net/");
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+        var query = "{\"request\":{\"LicenseKey\":\"" + _config["ApiKeys:ACC:licenseKey"] +
+                    "\",\"Locale\":\"en\",\"Currency\":\"EUR\",\"CompanyId\":\"_al\",\"Limit\":\"25000\",\"Filters\":[{\"id\":\"producer\",\"values\":[\"LV\"]}]}}";
+
         var request = new HttpRequestMessage(HttpMethod.Post, "v1/GetProducts");
-        request.Content = new StringContent("{\"request\":{\"LicenseKey\":\"***REMOVED***\",\"Locale\":\"en\",\"Currency\":\"EUR\",\"CompanyId\":\"_al\",\"Limit\":\"25000\",\"Filters\":[{\"id\":\"producer\",\"values\":[\"LV\"]}]}}",
-                            Encoding.UTF8, "application/json");         // ,\"Filters\":{\"producer\":\"LV\"}
+        request.Content = new StringContent(query, Encoding.UTF8, "application/json");
 
         try {
             var response = await client.SendAsync(request);

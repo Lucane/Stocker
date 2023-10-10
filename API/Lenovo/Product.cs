@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Microsoft.AspNetCore.Components;
+using System.Text.Json;
 
 namespace Stocker.API.Lenovo;
 
@@ -34,13 +35,16 @@ public class Product
         public List<string> OperatingSystems { get; set; }
     }
 
+    [Inject]
+    private IConfiguration _config { get; set; }
+
     /// <summary>
     /// Returns the API response as a deserialized object of <see cref="ProductObject"/>.<br/>
     /// Returns <see langword="null"/> instead if the API request was unsuccessful or if the deserialization failed.
     /// </summary>
     /// <param name="productID">Product ID specified by either <c>ModelType</c>, Model or Serial.</param>
     /// <returns></returns>
-    public static async Task<ProductObject?> GetDetailsAsync(string productID)
+    public async Task<ProductObject?> GetDetailsAsync(string productID)
     {
         var apiResponse = await SendRequestAsync(productID);
         if (apiResponse is null) return null;
@@ -63,10 +67,10 @@ public class Product
     /// </summary>
     /// <param name="productID"></param>
     /// <returns></returns>
-    private static async Task<string?> SendRequestAsync(string productID)
+    private async Task<string?> SendRequestAsync(string productID)
     {
         var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("ClientID", "***REMOVED***");
+        client.DefaultRequestHeaders.Add("ClientID", _config["ApiKeys:Lenovo:clientId"]);
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"https://supportapi.lenovo.com/v2.5/Product?ID={productID}");
 
         try {

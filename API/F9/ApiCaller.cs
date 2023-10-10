@@ -8,6 +8,7 @@ using Stocker.Data;
 using StockerDB.Data.Stocker;
 using System.Xml.Linq;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 //using Newtonsoft.Json;
 
 namespace Stocker.API.F9;
@@ -18,6 +19,9 @@ public class ApiCaller
     {
         _context = context;
     }
+
+    [Inject]
+    private IConfiguration _config { get; set; }
 
     public async Task<bool> GetProducts()
     {
@@ -58,7 +62,7 @@ public class ApiCaller
                             $"<Date>{DateTime.Now.ToString("yyyy-MM-ddTHH-mm-sszzz")}</Date>" +
                             "<Route>" +
                                 "<From>" +
-                                    "<ClientID>***REMOVED***</ClientID>" +
+                                    "<ClientID>" + _config["ApiKeys:F9:clientId"] + "</ClientID>" +
                                 "</From>" +
                                 "<To>" +
                                     "<ClientID>1</ClientID>" +
@@ -71,7 +75,7 @@ public class ApiCaller
                         "</CatalogRequest>");
 
         var hash = GenerateMD5(request + "85986593409238459803");
-        query = $@"http://www.f9baltic.com/scripts/XML_Interface.dll?MfcISAPICommand=Default&USERNAME=***REMOVED***&PASSWORD=***REMOVED***&XML={request}&CHECK={hash}";
+        query = $@"http://www.f9baltic.com/scripts/XML_Interface.dll?MfcISAPICommand=Default&USERNAME={_config["ApiKeys:F9:username"]}&PASSWORD={_config["ApiKeys:F9:password"]}&XML={request}&CHECK={hash}";
 
         try {
             var response = await client.GetAsync(query);

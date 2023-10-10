@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Stocker.Data;
 using StockerDB.Data.Stocker;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Components;
 //using Newtonsoft.Json;
 
 namespace Stocker.API.ALSO;
@@ -24,6 +25,9 @@ public class ApiCaller
     {
         _context = context;
     }
+
+    [Inject]
+    private IConfiguration _config { get; set; }
 
     public async Task<bool> GetProducts()
     {
@@ -44,16 +48,15 @@ public class ApiCaller
 
         var client = new HttpClient();
         //HttpResponseMessage response = new HttpResponseMessage();
-        string query;
 
         var request = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF - 8""?><CatalogRequest>" +
-                @"<Route><From><ClientID>***REMOVED***</ClientID></From><To><ClientID>0</ClientID></To></Route>" +
+                @"<Route><From><ClientID>" + _config["ApiKeys:ALSO:clientId"] + "</ClientID></From><To><ClientID>0</ClientID></To></Route>" +
                 @"<Filters><Filter FilterID=""VendorID"" Value=""80008028"" /><Filter FilterID=""StockLevel"" Value=""All"" />" +
                 @"<Filter FilterID=""Price"" Value=""WOVAT"" />" +
                 @"</Filters></CatalogRequest>");
 
         try {
-            query = $@"https://b2b.also.ee/DirectXML.svc/0/scripts/XML_Interface.dll?USERNAME=***REMOVED***&PASSWORD=***REMOVED***&XML={request}";
+            var query = $@"https://b2b.also.ee/DirectXML.svc/0/scripts/XML_Interface.dll?USERNAME={_config["ApiKeys:ALSO:username"]}&PASSWORD={_config["ApiKeys:ALSO:password"]}&XML={request}";
             var response = await client.GetAsync(query);
             System.Diagnostics.Debug.WriteLine($@"Response from ALSO API :: {response}");
             System.Diagnostics.Debug.WriteLine(await response.Content.ReadAsStringAsync());
