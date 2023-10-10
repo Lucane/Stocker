@@ -186,48 +186,48 @@
                             }
                             
                             </RowTemplate>
-                            <ChildRowContent>
-		                        @if (tableContext.PartNumber == showDetails && tableContext.PriceMin > 0)
-				                    {
-                                    <MudTr>
-                                        <td colspan="4">
-	                                        <MudCard Square=true Outlined=true Style="background-color: #78A289">
-	                                            <MudCardContent>
-	                                                <MudTable Items="stockStatus?.Where(x => x.PartNumber == tableContext.PartNumber)" Context="childContext" Hover="true" Elevation="0" Style="z-index: 0">
-	                                                    <HeaderContent>
-                                                            <MudTh />
-                                                            <MudTh>Ladu</MudTh>
-		                                                    <MudTh>Saadaval</MudTh>
-		                                                    <MudTh>Saabuv kogus</MudTh>
-		                                                    <MudTh>Hind</MudTh>
-	                                                    </HeaderContent>
-	                                                    <RowTemplate>
-                                                            <MudTd />
-		                                                    <MudTd DataLabel="Ladu">@childContext.Warehouse</MudTd>
-		                                                    <MudTd DataLabel="Saadaval">
-                                                                @if (childContext.StockAvailable > 0) {
-                                                                    <MudText>@childContext.StockAvailable</MudText>
-                                                                } else {
-                                                                    <MudText>—</MudText>
-                                                                }
-                                                            </MudTd>
-		                                                    <MudTd DataLabel="Saabuv kogus">
-										                        @if ((childContext.StockAvailable ?? 0) == 0 && childContext.DateIncoming != DateTime.MinValue) {
-                                                                    <MudText>@childContext.DateIncoming.Value.ToString("yyyy-MM-dd")</MudText>
-                                                                }
-										                        else {
-                                                                    <MudText>—</MudText>
-                                                                }
-                                                            </MudTd>
-                                                            <MudTd DataLabel="Hind">@childContext.PriceDiscounted €</MudTd>
-	                                                    </RowTemplate>
-	                                                </MudTable>
-	                                            </MudCardContent>
-	                                        </MudCard>
-                                        </td>
-                                    </MudTr>
-		                            }
-	                        </ChildRowContent>
+                        <ChildRowContent>
+                            @if (tableContext.PartNumber == showDetails && tableContext.PriceMin > 0) {
+                                <MudTr>
+                                    <td colspan="4">
+                                        <MudCard Square=true Outlined=true Style="background-color: #78A289">
+                                            <MudCardContent>
+                                                <MudTable Items="stockStatus?.Where(x => x.PartNumber == tableContext.PartNumber)" Context="childContext" Hover="true" Elevation="0" Style="z-index: 0">
+                                                    <HeaderContent>
+                                                        <MudTh />
+                                                        <MudTh>Ladu</MudTh>
+                                                        <MudTh>Saadaval</MudTh>
+                                                        <MudTh>Saabuv kogus</MudTh>
+                                                        <MudTh>Hind</MudTh>
+                                                    </HeaderContent>
+                                                    <RowTemplate>
+                                                        <MudTd />
+                                                        <MudTd DataLabel="Ladu">
+                                                            <MudText Typo="Typo.inherit">@childContext.Warehouse</MudText>
+                                                        </MudTd>
+                                                        <MudTd DataLabel="Saadaval">
+                                                            @if (childContext.StockAvailable > 0) {
+                                                                <MudText Typo="Typo.inherit">@childContext.StockAvailable</MudText>
+                                                            } else {
+                                                                <MudText>—</MudText>
+                                                            }
+                                                        </MudTd>
+                                                        <MudTd DataLabel="Saabuv kogus">
+                                                            @if ((childContext.StockAvailable ?? 0) == 0 && childContext.DateIncoming != DateTime.MinValue) {
+                                                                <MudText Typo="Typo.inherit">@childContext.DateIncoming.Value.ToString("yyyy-MM-dd")</MudText>
+                                                            } else {
+                                                                <MudText>—</MudText>
+                                                            }
+                                                        </MudTd>
+                                                        <MudTd DataLabel="Hind">@childContext.PriceDiscounted €</MudTd>
+                                                    </RowTemplate>
+                                                </MudTable>
+                                            </MudCardContent>
+                                        </MudCard>
+                                    </td>
+                                </MudTr>
+                            }
+                        </ChildRowContent>
                             <PagerContent>
                                 <MudTablePager PageSizeOptions="new int[]{50, 100}"  HideRowsPerPage=true InfoFormat="{first_item}-{last_item} (kokku {all_items})"/>
                             </PagerContent>
@@ -372,17 +372,19 @@
 	                                                    </HeaderContent>
 	                                                    <RowTemplate>
                                                             <MudTd />
-		                                                    <MudTd DataLabel="Ladu">@childContext.Warehouse</MudTd>
+		                                                    <MudTd DataLabel="Ladu">
+                                                                <MudText Typo="Typo.inherit">@childContext.Warehouse</MudText>
+                                                            </MudTd>
 		                                                    <MudTd DataLabel="Saadaval">
                                                                 @if (childContext.StockAvailable > 0) {
-                                                                    <MudText>@childContext.StockAvailable</MudText>
+                                                                    <MudText Typo="Typo.inherit">@childContext.StockAvailable</MudText>
                                                                 } else {
                                                                     <MudText>—</MudText>
                                                                 }
                                                             </MudTd>
 		                                                    <MudTd DataLabel="Saabuv kogus">
 										                        @if ((childContext.StockAvailable ?? 0) == 0 && childContext.DateIncoming != DateTime.MinValue) {
-                                                                    <MudText>@childContext.DateIncoming.Value.ToString("yyyy-MM-dd")</MudText>
+                                                                    <MudText Typo="Typo.inherit">@childContext.DateIncoming.Value.ToString("yyyy-MM-dd")</MudText>
                                                                 }
 										                        else {
                                                                     <MudText>—</MudText>
