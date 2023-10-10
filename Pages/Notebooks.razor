@@ -166,7 +166,7 @@
 		                            <MudTd DataLabel="Ladu">@childContext.Warehouse</MudTd>
 		                            <MudTd DataLabel="Saadaval">
                                         @if (childContext.Stock_Local > 0) {
-                                            <MudText>@childContext.Stock_Local</MudText>
+                                            <MudText Typo="Typo.inherit">@childContext.Stock_Local</MudText>
                                         } else {
                                             <MudText>—</MudText>
                                         }
@@ -176,7 +176,7 @@
                                             <MudText>—</MudText>
                                         }
 										else {
-                                            @childContext.Stock_Ordered
+                                            <MudText Typo="Typo.inherit">@childContext.Stock_Ordered</MudText>
                                         }
                                     </MudTd>
 		                            <MudTd DataLabel="Saabuv kogus">
@@ -189,11 +189,13 @@
                                             }
 
                                             @if (childContext.Date_Incoming.HasValue) {
-                                                @childContext.Date_Incoming.Value.ToString("yyyy-MM-dd")
+                                                <MudText Typo="Typo.inherit">@childContext.Date_Incoming.Value.ToString("yyyy-MM-dd")</MudText>
                                             }
                                         }
                                     </MudTd>
-                                    <MudTd DataLabel="Hind">@childContext.Price_Local €</MudTd>
+                                    <MudTd DataLabel="Hind">
+                                        <MudText Typo="Typo.inherit">@childContext.Price_Local €</MudText>
+                                    </MudTd>
 	                            </RowTemplate>
 	                        </MudTable>
 
