@@ -136,7 +136,8 @@ public partial class Parts
         _showLoadingOverlay = true;
         StateHasChanged();
 
-        var details = await API.Lenovo.Product.GetDetailsAsync(_searchInput);
+        var product = new API.Lenovo.Product();
+        var details = await product.GetDetailsAsync(_searchInput);
         //System.Diagnostics.Debug.WriteLine(":: SearchCustomInput => " + _searchInput + " => " + details?.Type + " => " + details?.ID);
 
         if (details is null) {
