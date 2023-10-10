@@ -84,7 +84,7 @@
                 @*Style="background-color: #78A289*@
                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 200px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, object>(x=>x.PartNumber)">Tootekood</MudTableSortLabel></MudTh>
                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
-                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; width: 100px"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.TotalStockLocal)"></MudTableSortLabel></MudTh>
+                <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; width: 100px"><MudTableSortLabel Enabled=false SortBy="new Func<Product, object>(x=>x.TotalStockLocal)"></MudTableSortLabel></MudTh>
                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 100px"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.PriceLocalMin)">Hind</MudTableSortLabel></MudTh>
             </HeaderContent>
 
