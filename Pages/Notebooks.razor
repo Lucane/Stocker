@@ -90,10 +90,16 @@
 
             <RowTemplate>
                 <MudBlazor.MudTd class="cursor-pointer" DataLabel="Tootekood">
-                    @tableContext.PartNumber
+                    <MudText>
+                        <MudHighlighter Text="@tableContext.PartNumber" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                    </MudText>
                     @*<MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" @onclick="CopyTextToClipboard"/>*@
                 </MudBlazor.MudTd>
-                <MudBlazor.MudTd class="cursor-pointer" DataLabel="Kirjeldus">@tableContext.Description</MudBlazor.MudTd>
+                <MudBlazor.MudTd class="cursor-pointer" DataLabel="Kirjeldus">
+                    <MudText>
+                        <MudHighlighter Text="@tableContext.Description" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
+                    </MudText>
+                </MudBlazor.MudTd>
                 <MudBlazor.MudTd class="cursor-pointer" DataLabel="Laoseis" Style="vertical-align: central; text-align: center; font-weight: 500">
                     @if (tableContext.IsCarePack) {
                         <div class="badge">ESD</div>
