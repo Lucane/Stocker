@@ -1,25 +1,4 @@
-﻿@*@inherits LayoutComponentBase
-
-<PageTitle>Stocker</PageTitle>
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4 auth">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-*@
-@using MudBlazor
+﻿@using MudBlazor
 @inherits LayoutComponentBase
 
 <style>
@@ -62,24 +41,12 @@
     <MudAppBar Elevation="0" Style="background-color: darkslategray">
         <a Class="app-title-text" Href="">STOCKER</a>
         <MudIconButton Style="visibility: hidden" />
-        @*<MudButton onselect="new Func" Variant="Variant.Text" Href="index" StartIcon="@Icons.Material.Filled.Home">Home</MudButton>*@
-        <MudButton Variant="Variant.Text" Href="notebooks" StartIcon="@Icons.Material.Filled.Warehouse">Hulgilaod</MudButton>
+        <MudButton Variant="Variant.Text" Href="products" StartIcon="@Icons.Material.Filled.Warehouse">Hulgilaod</MudButton>
         <MudButton Variant="Variant.Text" Href="parts" StartIcon="@Icons.Material.Filled.Hardware">Varuosad</MudButton>
         <MudBadge Icon="@Icons.Material.Outlined.AccessTime" Overlap=true Origin="Origin.TopRight" Color="Color.Warning">
             <MudButton Variant="Variant.Text" Href="service" StartIcon="@Icons.Material.Filled.SupportAgent" Disabled=true>Hooldustööd</MudButton>
         </MudBadge>
-
-        @*<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />*@
     </MudAppBar>
-    @*<MudDrawer @bind-Open="_drawerOpen" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Stocker</MudText>
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>*@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="my-4 pt-4">
             @Body

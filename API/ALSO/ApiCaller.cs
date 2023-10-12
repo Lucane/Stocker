@@ -1,25 +1,12 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using System.Xml.Serialization;
-using System.Text.RegularExpressions;
-using System.Web;
+﻿using System.Xml.Serialization;
 using Microsoft.EntityFrameworkCore;
-using Stocker.Data;
 using StockerDB.Data.Stocker;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Components;
-//using Newtonsoft.Json;
 
 namespace Stocker.API.ALSO;
 public class ApiCaller
 {
-    //private readonly IDbContextFactory<ApplicationDbContext> _context;
-
-    //public ApiCaller(IDbContextFactory<ApplicationDbContext> contextFactory)
-    //{
-    //    _context = contextFactory;
-    //}
-
     private readonly StockerContext _context;
     public ApiCaller(StockerContext context)
     {
@@ -47,7 +34,6 @@ public class ApiCaller
         //return contents;
 
         var client = new HttpClient();
-        //HttpResponseMessage response = new HttpResponseMessage();
 
         var request = XDocument.Parse(@"<?xml version=""1.0"" encoding=""UTF - 8""?><CatalogRequest>" +
                 @"<Route><From><ClientID>" + _config["ApiKeys:ALSO:clientId"] + "</ClientID></From><To><ClientID>0</ClientID></To></Route>" +
@@ -63,15 +49,6 @@ public class ApiCaller
 
             if (response is not null && response.IsSuccessStatusCode) return await response.Content.ReadAsStringAsync();
 
-            //await client.SendAsync(request)
-            //        .ContinueWith(responseTask => {
-            //            System.Diagnostics.Debug.WriteLine($@"Response from ACC API :: ({responseTask.Status})");
-            //            System.Diagnostics.Debug.WriteLine("RESULT :: " + responseTask.Result);
-            //            System.Diagnostics.Debug.WriteLine("CONTENT :: " + responseTask.Result.Content.ReadAsStringAsync().Result);
-            //        });
-
-            //System.Diagnostics.Debug.WriteLine("finished processing API");
-            //return null;
         } catch (Exception ex) {
             System.Diagnostics.Debug.WriteLine($@"ERROR while querying ALSO API :: {ex.Message} &-& {ex.InnerException}");
         }
@@ -93,7 +70,6 @@ public class ApiCaller
         } catch (Exception ex) {
             System.Diagnostics.Debug.WriteLine($@"ERROR while deserializing ALSO API response :: {ex.Message} &-& {ex.InnerException}");
         }
-        //var responseObject = JsonConvert.DeserializeObject<Root>(content);
 
         if (responseObject is null) return await Task.FromResult(false);
 
@@ -109,20 +85,13 @@ public class ApiCaller
 
             newProduct.CarePack = product.Product.CarePack;
             newProduct.Category = product.Product.Grouping.Where(x => x.GroupID == "ClassID").FirstOrDefault()?.Value;
-            //newProduct.Date_Incoming = product.
             newProduct.Description = product.Product.LongDesc;
             newProduct.LastUpdated = lastUpdated;
             newProduct.PartNumber = product.Product.PartNumber;
             newProduct.Price_Local = product.Price.UnitPrice.Value;
             newProduct.Price_Remote = product.Qty.Where(x => x.WarehouseID == "FI" || x.WarehouseID == "LT").Min(x => (decimal?)x.UnitPrice);
-            //newProduct.Stock_Incoming = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "1").FirstOrDefault().QtyAvailable);
             newProduct.Stock_Local = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "1").FirstOrDefault()?.QtyAvailable);
             newProduct.Stock_Remote = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "2").FirstOrDefault()?.QtyAvailable);
-
-            //if (product.Reserve is not null) {
-            //    newProduct.Stock_Ordered = Convert.ToInt32(product.Reserve.OrderQty);
-            //    newProduct.Stock_Reserved = Convert.ToInt32(product.Reserve.ReserveQty);
-            //}
 
             newProduct.Warehouse = "ALSO";
             newProduct.Warranty = product.Product.PeriodofWarranty;

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 
 namespace Stocker.Pages;
+
 public partial class Parts
 {
     [Inject] private IDialogService DialogService { get; set; }
@@ -68,15 +69,7 @@ public partial class Parts
             var user = (await authenticationStateTask).User;
             if (user.Identity != null) {
                 products = await @Service.GetAllProductsAsync();
-
-                //UserIdentityName = user.Identity.Name ?? "";
-                
-                //await FilterChips();
             }
-            
-            //if (!user.Identity!.IsAuthenticated) {
-            //    NavManager.NavigateTo($"Identity/Account/Login");
-            //}
         }
     }
 
@@ -98,8 +91,6 @@ public partial class Parts
             return true;
         if (element.Category.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        //if ($"{element.Number} {element.Position} {element.Molar}".Contains(searchString))
-        //    return true;
 
         return false;
     }
@@ -138,7 +129,6 @@ public partial class Parts
 
         var product = new API.Lenovo.Product();
         var details = await product.GetDetailsAsync(_searchInput);
-        //System.Diagnostics.Debug.WriteLine(":: SearchCustomInput => " + _searchInput + " => " + details?.Type + " => " + details?.ID);
 
         if (details is null) {
             var parameters = new DialogParameters();
@@ -172,7 +162,6 @@ public partial class Parts
     {
         if (dev is null) return;
         await PopulateTable(dev.ProductURL);
-        //System.Diagnostics.Debug.WriteLine(":: DeviceSelectionChanged => " + dev.Name);
     }
 
     private async Task FiltersChanged()
@@ -199,8 +188,6 @@ public partial class Parts
 
     private async Task PopulateTable(string fullURL)
     {
-        //if (_device is null) return;
-
         _showTable = false;
         _showLoadingOverlay = true;
         modelParts = null;
@@ -246,12 +233,6 @@ public partial class Parts
         }
 
         foreach (var m in compatibleParts) {
-            //var matches = parts.Where(x => x.PartNumber == m.PartNumber);
-            //var incomingDate = matches.Min(x => x.Date_Incoming);
-            //var incomingQty = matches.Sum(x => x.Stock_Incoming);
-
-            //var priceMin = matches.Any(x => x.Stock_Local > 0). Min(x => x.Price_Local);
-
             var stockMatches = stockStatus?.Where(x => x.PartNumber == m.PartNumber);
             if (stockMatches is null) continue;
 
@@ -264,8 +245,6 @@ public partial class Parts
                 PartNumber = m?.PartNumber ?? "",
                 Description = m?.Description ?? "",
                 ImageURLs = m.ImageURLs
-                //TotalStock = matches.Select(x => x.Stock_Local).Sum(),
-                //PriceLocalMin = matches.Min(x => x.Price_Local),
             });
         }
 
@@ -291,10 +270,6 @@ public partial class Parts
 
         if (compatibleParts is null || compatibleParts?.Count() == 0) {
             _showTable = false;
-            //var UrlWithoutLastPath = String.Join(String.Empty,
-            //    new Uri(_device.ProductURL).AbsoluteUri.ToString() +
-            //    new Uri(_device.ProductURL).Segments.SkipLast(1).ToList());
-
             var UrlWithoutLastPath = Regex.Replace(_device.ProductURL, @"\/(compatible|as-built|model)", "");
 
             if (_device.ProductURL.Contains("/as-built")
@@ -317,21 +292,12 @@ public partial class Parts
             return;
         }
 
-
         if (compatibleParts is null) return;
 
         stockStatus = await Flex.ApiCaller.GetStockStatus(compatibleParts.Select(x => x.PartNumber).ToList());
-
         partList = new List<Product>();
-        //var newList = parts;
 
         foreach (var m in compatibleParts) {
-            //var matches = parts.Where(x => x.PartNumber == m.PartNumber);
-            //var incomingDate = matches.Min(x => x.Date_Incoming);
-            //var incomingQty = matches.Sum(x => x.Stock_Incoming);
-
-            //var priceMin = matches.Any(x => x.Stock_Local > 0). Min(x => x.Price_Local);
-
             var stockMatches = stockStatus?.Where(x => x.PartNumber == m.PartNumber);
             if (stockMatches is null) continue;
 
@@ -344,8 +310,6 @@ public partial class Parts
                 PartNumber = m.PartNumber,
                 Description = m.Description,
                 ImageURLs = m.ImageURLs
-                //TotalStock = matches.Select(x => x.Stock_Local).Sum(),
-                //PriceLocalMin = matches.Min(x => x.Price_Local),
             });
         }
 
@@ -355,7 +319,6 @@ public partial class Parts
                                                                   )).ToList();
 
         _selectedCategories = filteredList.Select(x => x.Category).Distinct();
-
         _tableLoading = false;
     }
 }

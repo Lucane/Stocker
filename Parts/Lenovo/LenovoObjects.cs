@@ -1,6 +1,5 @@
 ﻿namespace Stocker.Parts.Lenovo;
 
-
 public class ParsedObject
 {
     public bool IsModelPart { get; set; }

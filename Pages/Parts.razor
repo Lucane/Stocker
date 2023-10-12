@@ -1,4 +1,5 @@
 ﻿@page "/parts"
+
 @using Stocker.Data
 @using StockerDB.Data.Stocker
 @using MudBlazor
@@ -14,8 +15,6 @@
 <AuthorizeView>
     <!-- Show this section if the user is logged in -->
     <Authorized>
-        @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData">Uuenda</MudButton>*@
-
         <MudOverlay @bind-Visible="_showLoadingOverlay" LightBackground=false DarkBackground=false>
             <MudProgressCircular Color="Color.Info" Indeterminate="true" />
         </MudOverlay>
@@ -23,19 +22,6 @@
         <MudOverlay @bind-Visible="showImageOverlay" LightBackground=true DarkBackground=false AutoClose=true>
             <ChildContent>
                 <MudCarousel TData="string" ItemsSource="compatibleParts.FirstOrDefault(x => x.PartNumber == showImages).ImageURLs" Context="carousel" AutoCycle=false Style="height:95vh; width:90vw" >
-                    @*<BulletTemplate>
-                        <div Class="mud-button-root mud-icon-button mud-icon-button-color-inherit mud-ripple mud-ripple-icon">
-                            <span class="mud-icon-button-label">
-                                @{
-                                    var dimCss = "opacity: 0.5";
-                                    if (true) dimCss = "";
-                                }
-                                <MudItem style="@dimCss">
-                                    <MudImage Src="@carousel" Style="max-height: 40px; max-height: 40px"  />
-                                </MudItem>
-                            </span>
-                        </div>
-                    </BulletTemplate>*@
                     <ItemTemplate>
                         <MudItem Class="d-flex justify-center mt-10 pt-5">
                            <MudImage Elevation="5" Src="@carousel" Style="max-height: 85vh; max-width: 90vw" Class="mx-auto" ObjectFit="ObjectFit.Contain" ObjectPosition="ObjectPosition.Center"/>
@@ -76,29 +62,18 @@
                                 <col style="flex-wrap: nowrap" />
                             </ColGroup>
                             <ToolBarContent>
-                                @*<MudText Typo="Typo.h6">Laoseis</MudText>*@
                                     <MudTextField @bind-Value="searchString" Placeholder="Otsi varuosa" Adornment="Adornment.Start" Immediate=true
                                                 FullWidth=true AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium">
                                     </MudTextField>
                                     <MudIconButton Style="visibility: hidden" />
                                     <MudChipSet MultiSelection="true" Style="display: flex; align-self: end" @bind-SelectedChips="_selectedChipsModel">
-                                        @*<MudChip Text="ACC" Default=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ACC</MudChip>
-                                        <MudChip Text="ALSO" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ALSO</MudChip>
-                                        <MudChip Text="F9" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:F9</MudChip>*@
                                         <MudChip Text="InStock" Default="true" Variant="Variant.Text" Color="Color.Success" OnClick="FiltersChanged" Size="Size.Small">Laos</MudChip>
                                         <MudChip Text="Incoming" Default="true" Variant="Variant.Text" Color="Color.Warning" OnClick="FiltersChanged" Size="Size.Small">Saabumas</MudChip>
                                         <MudChip Text="OutOfStock" Default="true" Variant="Variant.Text" Color="Color.Error" OnClick="FiltersChanged" Size="Size.Small">Pole saadaval</MudChip>
                                     </MudChipSet>
-                                    @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData" Style="align-self: flex-end; vertical-align: central">Uuenda</MudButton>*@
-                
                             </ToolBarContent>
 
                             <HeaderContent>
-                                @*<MudBlazor.MudTh>Part Number</MudBlazor.MudTh>
-                                <MudBlazor.MudTh>Description</MudBlazor.MudTh>
-                                <MudBlazor.MudTh>Stock EE</MudBlazor.MudTh>
-                                <MudBlazor.MudTh>Price EE</MudBlazor.MudTh>*@
-                                @*Style="background-color: #78A289*@
                                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 200px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, object>(x=>x.PartNumber)">Varuosakood</MudTableSortLabel></MudTh>
                                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
                                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; width: 150px" />
@@ -110,7 +85,6 @@
                                     <MudText>
                                         <MudHighlighter Text="@tableContext.PartNumber" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
                                     </MudText>
-                                    @*<MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" @onclick="CopyTextToClipboard"/>*@
                                 </MudBlazor.MudTd>
 
                                 <MudBlazor.MudTd DataLabel="Kirjeldus">
@@ -130,7 +104,6 @@
                                     @if (tableContext.ImageURLs?.Count() > 0) {
                                         <MudBadge Content="tableContext.ImageURLs.Count()" Overlap=true Origin="Origin.TopRight" Color="Color.Info" Class="mr-3">
                                             <MudIcon Icon="@Icons.Material.Outlined.PhotoLibrary" Color="Color.Info" @onclick="() => PopulateImageOverlay(cont)" Class="cursor-pointer" />
-                                            @*<MudIconButton Icon="@Icons.Material.TwoTone.Image" Color="Color.Info" Size="Size.Small" @onclick="PopulateOverlay"/>*@
                                         </MudBadge>
                                     
                                     } else {
@@ -138,10 +111,6 @@
                                     }
 
                                     @if (tableContext.TotalStock > 0) {
-                                            @*<MudTooltip Text="Laos" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
-                                                <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
-                                            </MudTooltip>*@
-
                                             <MudTooltip Placement="Placement.Left" Delay="50" Color="Color.Dark">
                                                 <ChildContent>
                                                     <MudIcon Class="cursor-pointer" @onclick="() => ShowRowDetails(tableContext.PartNumber)"
@@ -245,29 +214,18 @@
                                 <col style="flex-wrap: nowrap" />
                             </ColGroup>
                             <ToolBarContent>
-                                @*<MudText Typo="Typo.h6">Laoseis</MudText>*@
                                     <MudTextField @bind-Value="searchString" Placeholder="Otsi varuosa" Adornment="Adornment.Start" Immediate=true
                                                 FullWidth=true AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium">
                                     </MudTextField>
                                     <MudIconButton Style="visibility: hidden" />
                                     <MudChipSet MultiSelection="true" Style="display: flex; align-self: end" @bind-SelectedChips="_selectedChips" >
-                                        @*<MudChip Text="ACC" Default=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ACC</MudChip>
-                                        <MudChip Text="ALSO" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:ALSO</MudChip>
-                                        <MudChip Text="F9" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FiltersChanged" Size="Size.Small">Ladu:F9</MudChip>*@
                                         <MudChip Text="InStock" Default="true" Variant="Variant.Text" Color="Color.Success" OnClick="FiltersChanged" Size="Size.Small">Laos</MudChip>
                                         <MudChip Text="Incoming" Default="true" Variant="Variant.Text" Color="Color.Warning" OnClick="FiltersChanged" Size="Size.Small">Saabumas</MudChip>
                                         <MudChip Text="OutOfStock" Default="true" Variant="Variant.Text" Color="Color.Error" OnClick="FiltersChanged" Size="Size.Small">Pole saadaval</MudChip>
                                     </MudChipSet>
-                                    @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData" Style="align-self: flex-end; vertical-align: central">Uuenda</MudButton>*@
-                
                             </ToolBarContent>
 
                             <HeaderContent>
-                                @*<MudBlazor.MudTh>Part Number</MudBlazor.MudTh>
-                                <MudBlazor.MudTh>Description</MudBlazor.MudTh>
-                                <MudBlazor.MudTh>Stock EE</MudBlazor.MudTh>
-                                <MudBlazor.MudTh>Price EE</MudBlazor.MudTh>*@
-                                @*Style="background-color: #78A289*@
                                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 200px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, object>(x=>x.PartNumber)">Varuosakood</MudTableSortLabel></MudTh>
                                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
                                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; width: 150px" />
@@ -279,7 +237,6 @@
                                     <MudText>
                                         <MudHighlighter Text="@tableContext.PartNumber" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
                                     </MudText>
-                                    @*<MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" @onclick="CopyTextToClipboard"/>*@
                                 </MudBlazor.MudTd>
 
                                 <MudBlazor.MudTd DataLabel="Kirjeldus">
@@ -299,7 +256,6 @@
                                     @if (tableContext.ImageURLs?.Count() > 0) {
                                         <MudBadge Content="tableContext.ImageURLs.Count()" Overlap=true Origin="Origin.TopRight" Color="Color.Info" Class="mr-3">
                                             <MudIcon Icon="@Icons.Material.Outlined.PhotoLibrary" Color="Color.Info" @onclick="() => PopulateImageOverlay(cont)" Class="cursor-pointer" />
-                                            @*<MudIconButton Icon="@Icons.Material.TwoTone.Image" Color="Color.Info" Size="Size.Small" @onclick="PopulateOverlay"/>*@
                                         </MudBadge>
                                     
                                     } else {
@@ -307,10 +263,6 @@
                                     }
 
                                     @if (tableContext.TotalStock > 0) {
-                                            @*<MudTooltip Text="Laos" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
-                                                <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
-                                            </MudTooltip>*@
-
                                             <MudTooltip Placement="Placement.Left" Delay="50" Color="Color.Dark">
                                                 <ChildContent>
                                                     <MudIcon Class="cursor-pointer" @onclick="() => ShowRowDetails(tableContext.PartNumber)"
@@ -408,11 +360,11 @@
         }
     </Authorized>
 
-    @*<NotAuthorized>
+    <NotAuthorized>
         @{ NavManager.NavigateTo($"Identity/Account/Login"); }
         @{
             var returnUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
             <_RedirectToLogin ReturnUrl="@returnUrl"/>
         }
-    </NotAuthorized>*@
+    </NotAuthorized>
 </AuthorizeView>

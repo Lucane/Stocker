@@ -1,31 +1,24 @@
 ﻿@page "/connections"
+
 @using Stocker.Data
 @using StockerDB.Data.Stocker
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@*
-    Using OwningComponentBase ensures that the service and related services
-    that share its scope are disposed with the component.
-    Otherwise DbContext in ForecastService will live for the life of the
-    connection, which may be problematic if clients stay
-    connected for a long time.
-    We access WeatherForecastService using @Service
-*@
 @inherits OwningComponentBase<WarehouseConnectionsService>
+
 <h1>Hulgiladude API ühendused</h1>
+
 <!-- AuthorizeView allows us to only show sections of the page -->
 <!-- based on the security on the current user -->
 <AuthorizeView>
     <!-- Show this section if the user is logged in -->
     <Authorized>
-        @*<h4>Hello, @context.User.Identity?.Name!</h4>*@
         @if (warehouses == null)
         {
-            <!-- Show this if the current user has no data... yet... -->
             <p><em>Laen andmeid...</em></p>
         }
         else
         {
-            <!-- Show the forecasts for the current user -->
             <table class="table">
                 <thead>
                     <tr>
@@ -38,18 +31,15 @@
                             </button>
                             @if (ShowPopup)
                             {
-                                <!-- This is the popup to create or edit a forecast -->
                                 <div class="modal" tabindex="-1" style="display:block" role="dialog">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h3 class="modal-title">Muuda andmeid</h3>
-                                                <!-- Button to close the popup -->
                                                 <button class="btn btn-close" @onclick="ClosePopup">
                                                     <span aria-hidden="true" />
                                                 </button>
                                             </div>
-                                            <!-- Edit form for the current forecast -->
                                             <div class="modal-body">
                                                 <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouse.DisplayName"/><br/>
                                                 <input class="form-control" type="url" placeholder="API URL" @bind="objWarehouse.ConnectionUri" /><br/>
@@ -118,7 +108,6 @@
             </table>
         }
     </Authorized>
-    <!-- Show this section if the user is not logged in -->
     <NotAuthorized>
         <p>Selle lehe nägemiseks pead olema sisse logitud!</p>
     </NotAuthorized>
@@ -126,23 +115,17 @@
 
 @code 
 {
-    // AuthenticationState is available as a CascadingParameter
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationStateTask { get; set; }
     List<WarehouseConnections> warehouses = new List<WarehouseConnections>();
 
-    // no need to limit access to this page as of now
-    //private string UserIdentityName = "";
-
     protected override async Task OnInitializedAsync()
     {
-        // Get the current user
         if (authenticationStateTask != null)
         {
             var user = (await authenticationStateTask).User;
             if (user.Identity != null)
             {
-                //UserIdentityName = user.Identity.Name ?? "";
                 warehouses = await @Service.GetWarehousesAsync();
             }
         }
@@ -155,7 +138,6 @@
 
     void ClosePopup()
     {
-        // Close the Popup
         ShowPopup = false;
         ShowRemovalPopup = false;
     }
@@ -169,12 +151,9 @@
 
     async Task SaveWarehouse()
     {
-        // Close the Popup
         ShowPopup = false;
-        // A new forecast will have the Id set to 0
         if (objWarehouse.Id == 0)
         {
-            // Create new forecast
             var objNewWarehouse = new WarehouseConnections();
             objNewWarehouse.DisplayName = objWarehouse.DisplayName;
             objNewWarehouse.ConnectionUri = objWarehouse.ConnectionUri;
@@ -182,7 +161,6 @@
             objNewWarehouse.LoginSecret = objWarehouse.LoginSecret;
             objNewWarehouse.LastUpdated = System.DateTime.Now;
 
-            // Save the result
             var result = @Service.CreateWarehouseAsync(objNewWarehouse);
         }
         else
@@ -190,7 +168,6 @@
             var result = @Service.UpdateWarehouseAsync(objWarehouse);
         }
 
-        // Get the forecasts for the current user
         warehouses = await @Service.GetWarehousesAsync();
     }
 

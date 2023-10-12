@@ -1,5 +1,4 @@
-﻿//using K4os.Compression.LZ4;
-using LZ4;
+﻿using LZ4;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -25,7 +24,6 @@ public class SessionStorage
 
         CompressedObject compressedJson;
         string? decompressedContent;
-        //System.Diagnostics.Debug.WriteLine($@"Content from Lenovo PCSupport :: {content}");
 
         try {
             compressedJson = JsonSerializer.Deserialize<CompressedObject>(content);

@@ -23,11 +23,6 @@ public class ApiCaller
         if (response_stocks is null || response_prices is null) return null;
 
         return await DeserializeAndCombineResults(response_stocks, response_prices);
-
-        //var populateResponse = await PopulateDatabase(apiResponse);
-        //if (populateResponse is false) return null;
-
-        //return await Task.FromResult(true);
     }
 
     /// <summary>
@@ -148,7 +143,6 @@ public class ApiCaller
 
         try {
             var response = await client.SendAsync(request);
-            //response = await client.GetAsync(client.BaseAddress);
             System.Diagnostics.Debug.WriteLine($@"Response from Flex stock query :: {response}");
             if (response is not null && response.IsSuccessStatusCode) return await response.Content.ReadAsStringAsync();
         } catch (Exception ex) {
@@ -171,7 +165,7 @@ public class ApiCaller
         foreach (var p in partNumbers) {
             serializedSKUs += @"{""sku"": """ + p + @"""},";
         }
-        serializedSKUs = serializedSKUs.TrimEnd(',');      // Removes the extra comma that was added in the foreach loop.
+        serializedSKUs = serializedSKUs.TrimEnd(',');
 
         var vid = authTokens.vf.vid;
         var tokenIe = authTokens.actions.productListRd.ms.Where(ms => ms.name == "fetchPage").First();

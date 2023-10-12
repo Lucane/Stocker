@@ -36,10 +36,6 @@
       {
          "Name": "[dbo].[WarehouseProducts_ALSO]",
          "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[WeatherForecast]",
-         "ObjectType": 0
       }
    ],
    "UiHint": "(localdb)\\MSSQLLocalDB.aspnet-Stocker-6BAD2BE6-E604-46F3-8699-1B4A5DC57709",

@@ -2,7 +2,6 @@
 
 namespace Stocker.Parts.Flex;
 
-
 public class ApiRemotingImplObject
 {
     public Vf vf { get; set; }

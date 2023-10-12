@@ -1,19 +1,12 @@
-﻿@page "/notebooks"
+﻿@page "/products"
+
 @using Stocker.Data
 @using StockerDB.Data.Stocker
 @using System.Net.Http.Json
 @using MudBlazor
 @using Stocker.API
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@*
-    Using OwningComponentBase ensures that the service and related services
-    that share its scope are disposed with the component.
-    Otherwise DbContext in ForecastService will live for the life of the
-    connection, which may be problematic if clients stay
-    connected for a long time.
-    We access WeatherForecastService using @Service
-*@
-@*@inherits OwningComponentBase<WarehouseConnectionsService>*@
 @inherits OwningComponentBase<WarehouseProductsService>
 
 <style>
@@ -37,16 +30,6 @@
 <AuthorizeView>
     <!-- Show this section if the user is logged in -->
     <Authorized>
-        @*<button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="UpdateData">
-            <i class="oi oi-key"></i>
-        </button>*@
-
-        @*@if (products == null)
-        {
-            <!-- Show this if the current user has no data... yet... -->
-            <p><em>Laen andmeid...</em></p>
-        }
-        else {}*@
         <MudBlazor.MudTable Items="filtered" Virtualize=false Height="calc(100vh - 240px)" OnRowClick="ShowBtnPress" T="Product"
         Dense=true FixedHeader=true Context="tableContext" Hover=true Elevation="5" Outlined=false Style="min-height: 100px" RowsPerPage="100"
         SortLabel="Sorteeri" Filter="new Func<Product,bool>(FilterFunc)" Loading="_loading" LoadingProgressColor="Color.Info">
@@ -58,30 +41,19 @@
             </ColGroup>
 
             <ToolBarContent>
-                @*<MudText Typo="Typo.h6">Laoseis</MudText>*@
                     <MudTextField @bind-Value="searchString" Placeholder="Otsi toodet" Adornment="Adornment.Start" Immediate=true
                                 FullWidth=true AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium">
                     </MudTextField>
                     <MudIconButton Style="visibility: hidden" />
                     <MudChipSet MultiSelection="true" Style="display: flex; align-self: end" @bind-SelectedChips="selectedChips">
-                        @*<MudChip Text="ACC" Default=true Variant="Variant.Text" Color="Color.Info" OnClick="FilterChips" Size="Size.Small">Ladu:ACC</MudChip>
-                        <MudChip Text="ALSO" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FilterChips" Size="Size.Small">Ladu:ALSO</MudChip>
-                        <MudChip Text="F9" Default=true hidden=true Variant="Variant.Text" Color="Color.Info" OnClick="FilterChips" Size="Size.Small">Ladu:F9</MudChip>*@
                         <MudChip Text="InStock" Default=true Variant="Variant.Text" Color="Color.Success" OnClick="FilterChips" Size="Size.Small">Laos</MudChip>
                         <MudChip Text="Incoming" Default=true Variant="Variant.Text" Color="Color.Warning" OnClick="FilterChips" Size="Size.Small">Saabumas</MudChip>
                         <MudChip Text="OutOfStock" Default=false Variant="Variant.Text" Color="Color.Error" OnClick="FilterChips" Size="Size.Small">Laost otsas</MudChip>
                         <MudChip Text="ESD" Default=false Variant="Variant.Text" Color="Color.Primary" OnClick="FilterChips" Size="Size.Small">ESD</MudChip>
                     </MudChipSet>
-                    @*<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="UpdateData" Style="align-self: flex-end; vertical-align: central">Uuenda</MudButton>*@
-                
             </ToolBarContent>
 
             <HeaderContent>
-                @*<MudBlazor.MudTh>Part Number</MudBlazor.MudTh>
-                <MudBlazor.MudTh>Description</MudBlazor.MudTh>
-                <MudBlazor.MudTh>Stock EE</MudBlazor.MudTh>
-                <MudBlazor.MudTh>Price EE</MudBlazor.MudTh>*@
-                @*Style="background-color: #78A289*@
                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000; border-radius: 0px; width: 200px"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Product, object>(x=>x.PartNumber)">Tootekood</MudTableSortLabel></MudTh>
                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; font-weight: 1000"><MudTableSortLabel SortBy="new Func<Product, object>(x=>x.Description)">Kirjeldus</MudTableSortLabel></MudTh>
                 <MudTh Style="background-color: #3d6666; color: #FFFDFB; width: 50px"><MudTableSortLabel Enabled=false SortBy="new Func<Product, object>(x=>x.TotalStockLocal)"></MudTableSortLabel></MudTh>
@@ -93,7 +65,6 @@
                     <MudText>
                         <MudHighlighter Text="@tableContext.PartNumber" HighlightedText="@searchString" Style="background-color: #FFFF0060" />
                     </MudText>
-                    @*<MudIconButton Icon="@Icons.Material.Outlined.ContentCopy" Size="Size.Small" @onclick="CopyTextToClipboard"/>*@
                 </MudBlazor.MudTd>
                 <MudBlazor.MudTd class="cursor-pointer" DataLabel="Kirjeldus">
                     <MudText>
@@ -104,10 +75,6 @@
                     @if (tableContext.IsCarePack) {
                         <div class="badge">ESD</div>
                     } else if (tableContext.TotalStockLocal > 0) {
-                        @*<MudTooltip Text="Laos" Arrow=true Placement="Placement.Left" Delay="50" Color="Color.Dark">
-                            <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
-                        </MudTooltip>*@
-
                         <MudTooltip Placement="Placement.Left" Delay="50" Color="Color.Dark">
                             <ChildContent>
                                 <MudIcon Icon="@Icons.Material.TwoTone.ShoppingCart" Color="Color.Success" />
@@ -147,18 +114,8 @@
                     <MudTr>
                     <td colspan="4">
 	                <MudCard Square=true Outlined=true Style="background-color: #78A289">
-	                    @*<MudCardHeader>
-	                    <CardHeaderContent>
-	                        <MudText Typo="Typo.body1"><strong>@tableContext.Description</strong></MudText>
-	                    </CardHeaderContent>
-	                    </MudCardHeader>*@
 	                    <MudCardContent>
 	                        <MudTable Items="products.Where(x => x.PartNumber == tableContext.PartNumber).OrderBy(x => x.Price_Local)" Context="childContext" Hover="true" Elevation="0">
-	                            @*<ColGroup>
-                                    <col style="width:200px;" />
-		                            <col style="width:200px;" />
-		                            <col />
-	                            </ColGroup>*@
 	                            <HeaderContent>
                                     <MudTh />
                                     <MudTh>Ladu</MudTh>
@@ -204,25 +161,6 @@
                                     </MudTd>
 	                            </RowTemplate>
 	                        </MudTable>
-
-                            @*<MudTable Items="products.Where(x => x.PartNumber == tableContext.PartNumber).OrderBy(x => x.Price_Local)" Context="childContext" Hover="true" Elevation="0">
-	                            <HeaderContent>
-                                    <MudTh />
-                                    <MudTh>Ladu</MudTh>
-		                            <MudTh>Viimati uuendatud</MudTh>
-		                            <MudTh>Kategooria</MudTh>
-		                            <MudTh>Garantii</MudTh>
-		                            <MudTh>Hind</MudTh>
-	                            </HeaderContent>
-	                            <RowTemplate>
-                                    <MudTd />
-		                            <MudTd DataLabel="Warehouse">@childContext.Warehouse</MudTd>
-		                            <MudTd DataLabel="LastUpdated">@childContext.LastUpdated</MudTd>
-                                    <MudTd DataLabel="Bid_Customer">@childContext.Category</MudTd>
-		                            <MudTd DataLabel="Stock_Incoming">@(childContext.Warranty)</MudTd>
-                                    <MudTd DataLabel="Price_Local">@childContext.Price_Local €</MudTd>
-	                            </RowTemplate>
-	                        </MudTable>*@
 	                    </MudCardContent>
 	                </MudCard>
                     </td>
@@ -233,109 +171,16 @@
                 <MudTablePager PageSizeOptions="new int[]{50, 100}"  HideRowsPerPage=true InfoFormat="{first_item}-{last_item} (kokku {all_items})"/>
             </PagerContent>
         </MudBlazor.MudTable>
-        @*<h4>Hello, @context.User.Identity?.Name!</h4>*@
-        @*@if (warehouses == null)
-        {
-            <!-- Show this if the current user has no data... yet... -->
-            <p><em>Laen andmeid...</em></p>
-        }
-        else
-        {
-            <!-- Show the forecasts for the current user -->
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Ladu</th>
-                        <th>API URI</th>
-                        <th>Viimati muudetud</th>
-                        <th>
-                            <button style="float:right" class="btn btn-success" aria-hidden="true" @onclick="AddWarehouse">
-                                <i class="oi oi-plus"></i>
-                            </button>
-                            @if (ShowPopup)
-                            {
-                                <!-- This is the popup to create or edit a forecast -->
-                                <div class="modal" tabindex="-1" style="display:block" role="dialog">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h3 class="modal-title">Muuda andmeid</h3>
-                                                <!-- Button to close the popup -->
-                                                <button class="btn btn-close" @onclick="ClosePopup">
-                                                    <span aria-hidden="true" />
-                                                </button>
-                                            </div>
-                                            <!-- Edit form for the current forecast -->
-                                            <div class="modal-body">
-                                                <input class="form-control" placeholder="Lao nimetus" @bind="objWarehouse.DisplayName"/><br/>
-                                                <input class="form-control" type="url" placeholder="API URI" @bind="objWarehouse.ConnectionUri" /><br/>
-                                                <input class="form-control" placeholder="Kasutajanimi" @bind="objWarehouse.LoginName" /><br>
-                                                <input class="form-control" type="password" placeholder="Parool" @bind="objWarehouse.LoginSecret" /><br/><br />
-                                                
-                                                <button class="btn btn-success" @onclick="SaveWarehouse"> Salvesta</button>
-                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var wh in warehouses)
-                    {
-                        <tr>
-                            <td>@wh.DisplayName</td>
-                            <td>@wh.ConnectionUri</td>
-                            <td>@wh.LastUpdated</td>
-                            <td align="right">
-                                <span>
-                                    <button class="btn btn-primary" aria-hidden="true" @onclick="(() => EditWarehouse(wh))">
-                                        <i class="oi oi-pencil" />
-                                    </button>
-                                    <button class="btn btn-danger" aria-hidden="true" @onclick="(() => ConfirmRemoval(wh))">
-                                        <i class="oi oi-delete"></i>
-                                    </button>
-
-                                    @if (ShowRemovalPopup) {
-                                        <div class="modal" tabindex="-1" style="display:block" role="dialog">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h3 class="modal-title">Kustuta väärtus?</h3>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <table>
-                                                            <thead>
-                                                                <tr>
-                                                                    <th align="left">
-                                                                        <button class="btn btn-primary" @onclick="ClosePopup">
-                                                                            Tühista
-                                                                        </button>
-                                                                    </th>
-                                                                    <th align="right">
-                                                                        <button class="btn btn-danger" @onclick="DeleteWarehouse">
-                                                                            Kustuta
-                                                                        </button>
-                                                                    </th>
-                                                                </tr>
-                                                            </thead>
-                                                        </table>
-                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }*@
     </Authorized>
+
     <!-- Show this section if the user is not logged in -->
     <NotAuthorized>
-        <p>Selle lehe nägemiseks pead olema sisse logitud!</p>
+        @{
+            NavManager.NavigateTo($"Identity/Account/Login");
+        }
+        @{
+            var returnUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
+            <_RedirectToLogin ReturnUrl="@returnUrl" />
+        }
     </NotAuthorized>
 </AuthorizeView>

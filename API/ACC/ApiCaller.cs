@@ -12,12 +12,6 @@ using Microsoft.AspNetCore.Components;
 namespace Stocker.API.ACC;
 public class ApiCaller
 {
-    //private readonly IDbContextFactory<ApplicationDbContext> _context;
-
-    //public ApiCaller(IDbContextFactory<ApplicationDbContext> contextFactory)
-    //{
-    //    _context = contextFactory;
-    //}
 
     private readonly StockerContext _context;
     public ApiCaller(StockerContext context)
@@ -61,15 +55,6 @@ public class ApiCaller
 
             if (response is not null && response.IsSuccessStatusCode) return await response.Content.ReadAsStringAsync();
             
-            //await client.SendAsync(request)
-            //        .ContinueWith(responseTask => {
-            //            System.Diagnostics.Debug.WriteLine($@"Response from ACC API :: ({responseTask.Status})");
-            //            System.Diagnostics.Debug.WriteLine("RESULT :: " + responseTask.Result);
-            //            System.Diagnostics.Debug.WriteLine("CONTENT :: " + responseTask.Result.Content.ReadAsStringAsync().Result);
-            //        });
-
-            //System.Diagnostics.Debug.WriteLine("finished processing API");
-            //return null;
         } catch (Exception ex) {
             System.Diagnostics.Debug.WriteLine($@"ERROR while querying ACC API :: {ex.Message} &-& {ex.InnerException}");
         }
@@ -90,8 +75,6 @@ public class ApiCaller
             System.Diagnostics.Debug.WriteLine($@"ERROR while querying ACC API :: {ex.Message} &-& {ex.InnerException}");
         }
 
-        //var responseObject = JsonConvert.DeserializeObject<Root>(content);
-
         if (responseObject is null) return await Task.FromResult(false);
 
         var allProducts = new List<WarehouseProducts>();
@@ -100,8 +83,6 @@ public class ApiCaller
         var updatedAt = DateTime.Now;
 
         foreach (var product in responseObject.Products) {
-            //if (product.Producer.OId != "LV") continue;
-
             var newProduct = new WarehouseProducts();
 
             newProduct.CarePack = Convert.ToByte(product.IsEsd);
@@ -123,22 +104,10 @@ public class ApiCaller
             newProduct.Warranty = product.Warranty + " months";
 
             _context.Add(newProduct);
-            //using (var context = _context.CreateDbContext()) {
-            //    context.Add(newProduct);
-            //}
-            //dbContext.Add(newProduct);
-            //dbContext.SaveChanges();
-            //allProducts.Add(newProduct);
-            //return allProducts;
-            //.Database.Add(newProduct);
         }
 
         _context.SaveChanges();
-        //using (var context = _context.CreateDbContext()) {
-        //    context.SaveChanges();
-        //}
 
-        //dbContext.SaveChanges();
         return await Task.FromResult(true);
     }
 }

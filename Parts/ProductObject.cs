@@ -1,10 +1,5 @@
 ﻿namespace Stocker.Parts;
 
-//public class ProductObject
-//{
-//    public Class1[] Products { get; set; }
-//}
-
 public class ProductObject
 {
     public string Id { get; set; }

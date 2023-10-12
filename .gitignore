@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Parts/Lenovo/_ApiTests_officialAPI.http
+/Parts/EET/_ApiTests.http
+/Parts/EET/ApiCaller.cs
+/ScheduledTasks.cs
+/API/WooCommerce/ApiCaller.cs

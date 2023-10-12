@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Hosting.StaticWebAssets;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Stocker.Areas.Identity;
 using Stocker.Data;
@@ -26,9 +22,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 
 builder.Services.AddScoped<WarehouseProductsService>();
 builder.Services.AddScoped<WarehouseConnectionsService>();
-builder.Services.AddScoped<WeatherForecastService>();
 builder.Services.AddScoped<PartsService>();
-//builder.Services.AddScoped<Stocker.API.ACC.ApiCaller>();
 
 builder.Services.AddDbContext<StockerDB.Data.Stocker.StockerContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

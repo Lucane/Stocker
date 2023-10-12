@@ -1,15 +1,9 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Text;
 using System.Xml.Serialization;
-using System.Text.RegularExpressions;
-using System.Web;
 using Microsoft.EntityFrameworkCore;
-using Stocker.Data;
 using StockerDB.Data.Stocker;
 using System.Xml.Linq;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-//using Newtonsoft.Json;
 
 namespace Stocker.API.F9;
 public class ApiCaller
@@ -117,21 +111,12 @@ public class ApiCaller
                                           .Min(x => (DateTime?)x.DeliveryDate);
 
             newProduct.CarePack = Convert.ToByte(product.Qty.Any(x => x.QtyAvailable >= 10000));
-            //newProduct.Category = product.Product.Grouping.Where(x => x.GroupID == "Series").FirstOrDefault()?.Value;
             if (dateIncoming != DateTime.MinValue) newProduct.Date_Incoming = dateIncoming;
             newProduct.Description = product.Product.Description;
             newProduct.LastUpdated = lastUpdated;
             newProduct.PartNumber = product.Product.PartNumber;
             newProduct.Price_Local = product.Price.UnitPrice.FirstOrDefault()?.Value;
-            //newProduct.Price_Remote = product.Qty.Where(x => x.WarehouseID == "FI" || x.WarehouseID == "LT").Min()?.UnitPrice;
             newProduct.Stock_Local = product.Qty.Sum(x => x.QtyAvailable);
-            //newProduct.Stock_Incoming = product.Qty.);
-            //newProduct.Stock_Remote = Convert.ToInt32(product.Qty.Where(x => x.WarehouseID == "2").FirstOrDefault()?.QtyAvailable);
-
-            //if (product.Reserve is not null) {
-            //    newProduct.Stock_Ordered = Convert.ToInt32(product.Reserve.OrderQty);
-            //    newProduct.Stock_Reserved = Convert.ToInt32(product.Reserve.ReserveQty);
-            //}
 
             newProduct.Warehouse = "F9";
             newProduct.Warranty = product.Product.PeriodofWarranty;
